@@ -58,7 +58,7 @@ jobs:
         with:
           subject-path: source-*.zip
       - name: SBOM attestation
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@v4
         with:
           subject-path: source-*.zip
           sbom-path: sbom.spdx.json
