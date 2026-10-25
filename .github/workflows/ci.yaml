@@ -106,6 +106,7 @@ jobs:
       - name: Run the examples
         run: |
           for d in examples/*/; do
+            [ -d "$d" ] || continue
             echo "== $d"
             go run "./$d"
           done

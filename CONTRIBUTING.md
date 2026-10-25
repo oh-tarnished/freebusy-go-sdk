@@ -17,7 +17,7 @@ next regeneration.
 ```sh
 go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@v0.65.0
 go install github.com/the-protobuf-project/sdk/plugin/cmd/protoc-gen-sdk@latest
-./scripts/generate.sh
+bash scripts/generate.sh
 ```
 
 `scripts/generate.sh` runs `buf generate` in `api/`, then `go mod tidy`,
