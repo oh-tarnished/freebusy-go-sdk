@@ -14,16 +14,14 @@ import (
 
 // AutoPager walks every item of a paged method, fetching pages as it goes:
 //
-//	pager := client.Availability.SearchAvailabilityAutoPaging(ctx, &allocationpb.SearchAvailabilityRequest{…})
-//	for pager.Next() {
-//		item := pager.Current()
-//		…
-//	}
-//	if err := pager.Err(); err != nil {
-//		…
+//	for item, err := range client.Availability.SearchAvailabilityAutoPaging(ctx, params).All() {
+//		if err != nil {
+//			return err
+//		}
+//		fmt.Println(item)
 //	}
 //
-// or, with range: for item, err := range pager.All() { … }.
+// Next, Current and Err walk it the same way without range.
 type AutoPager[T any] struct {
 	next    func() (T, error)
 	current T

@@ -59,11 +59,12 @@ delete to make the write conditional.
 
 ```go
 availability, err := client.Availabilities.Get(ctx, &availabilitypb.GetAvailabilityRequest{
-	Name: "calendars/{calendar}/availabilities/{availability}",
+	Name: "calendars/my-calendar/availabilities/my-availabilitie",
 })
 if err != nil {
 	return err
 }
+fmt.Println(availability.String())
 ```
 
 ## List
@@ -102,15 +103,13 @@ resolve them.
 | `ShowDeleted` | `bool` |  | // Include soft-deleted availabilities in the result. |
 
 ```go
-pager := client.Availabilities.ListAutoPaging(ctx, &availabilitypb.ListAvailabilitiesRequest{
-	Parent: "calendars/{calendar}",
-})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for availability, err := range client.Availabilities.ListAutoPaging(ctx, &availabilitypb.ListAvailabilitiesRequest{
+	Parent: "calendars/my-calendar",
+}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(availability.String())
 }
 ```
 
@@ -151,12 +150,13 @@ availability; supply `availability_id` if the caller needs retry safety.
 
 ```go
 availability, err := client.Availabilities.New(ctx, &availabilitypb.CreateAvailabilityRequest{
-	Parent: "calendars/{calendar}",
-	Availability: &availabilitypb.Availability{ /* … */ },
+	Parent: "calendars/my-calendar",
+	Availability: &availabilitypb.Availability{},
 })
 if err != nil {
 	return err
 }
+fmt.Println(availability.String())
 ```
 
 ## Update
@@ -194,11 +194,12 @@ Idempotent. Pass the `etag` read from Get to make the write conditional.
 
 ```go
 availability, err := client.Availabilities.Update(ctx, &availabilitypb.UpdateAvailabilityRequest{
-	Availability: &availabilitypb.Availability{ /* … */ },
+	Availability: &availabilitypb.Availability{},
 })
 if err != nil {
 	return err
 }
+fmt.Println(availability.String())
 ```
 
 ## Delete
@@ -232,7 +233,7 @@ interface built on this.
 
 ```go
 if err := client.Availabilities.Delete(ctx, &availabilitypb.DeleteAvailabilityRequest{
-	Name: "calendars/{calendar}/availabilities/{availability}",
+	Name: "calendars/my-calendar/availabilities/my-availabilitie",
 }); err != nil {
 	return err
 }
@@ -263,9 +264,10 @@ NOT_FOUND.
 
 ```go
 availability, err := client.Availabilities.Undelete(ctx, &availabilitypb.UndeleteAvailabilityRequest{
-	Name: "calendars/{calendar}/availabilities/{availability}",
+	Name: "calendars/my-calendar/availabilities/my-availabilitie",
 })
 if err != nil {
 	return err
 }
+fmt.Println(availability.String())
 ```

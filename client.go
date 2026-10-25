@@ -13,12 +13,17 @@
 //	}
 //	defer client.Close()
 //
-//	pager := client.Availability.SearchAvailabilityAutoPaging(ctx, &allocationpb.SearchAvailabilityRequest{…})
+//	for item, err := range client.Availability.SearchAvailabilityAutoPaging(ctx, params).All() {
+//		if err != nil {
+//			return err
+//		}
+//		fmt.Println(item)
+//	}
 //
-// Every request, response and enum of the API is a type of this package,
-// the protobuf message itself; methods take the request message as their
-// params and return the response message. Errors are *Error, matched with
-// errors.Is against the Err… sentinels. The option package configures the
+// Requests, responses and enums are the API's protobuf messages, in the
+// pb/<package>pb packages; methods take the request message as their params
+// and return the response message. Errors are *Error, matched with
+// errors.Is against the Err sentinels. The option package configures the
 // client, one service (option.WithService), or one call.
 package freebusy
 

@@ -21,8 +21,14 @@ import (
 //
 // Branch on it with errors.Is and the sentinels below, never on Message:
 //
-//	if errors.Is(err, freebusy.ErrNotFound) { … }
-//	if errors.Is(err, freebusy.ErrCapacityExhausted) { … }
+//	switch {
+//	case errors.Is(err, freebusy.ErrNotFound):
+//		return nil // already gone
+//	case errors.Is(err, freebusy.ErrCapacityExhausted):
+//		return fmt.Errorf("try again later: %w", err)
+//	case err != nil:
+//		return err
+//	}
 //
 // or unpack it with errors.As (or AsError) for the details.
 type Error struct {
@@ -261,7 +267,7 @@ const (
 	ReasonWindowBeyondHorizon = "WINDOW_BEYOND_HORIZON"
 )
 
-// Sentinels for the error reasons: errors.Is(err, Err…) matches an *Error
+// Sentinels for the error reasons: errors.Is(err, Err<Reason>) style sentinels match an *Error
 // with that reason and domain.
 var (
 	// ErrCapacityExhausted is CAPACITY_EXHAUSTED (FAILED_PRECONDITION). Ask for fewer, or another window; `ComputeAvailability` shows what is free.

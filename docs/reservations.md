@@ -51,12 +51,15 @@ hold has lapsed or been released.
 
 ```go
 reservation, err := client.Reservations.New(ctx, &reservationpb.CreateReservationRequest{
-	Parent: "organizationalUnits/{organizational_unit}",
-	Reservation: &reservationpb.Reservation{ /* … */ },
+	Parent: "organizationalUnits/my-organizational-unit",
+	Reservation: &reservationpb.Reservation{
+		Hold: "organizationalUnits/my-organizational-unit/holds/my-hold",
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(reservation.String())
 ```
 
 ## Get
@@ -75,11 +78,12 @@ Retrieves one reservation.
 
 ```go
 reservation, err := client.Reservations.Get(ctx, &reservationpb.GetReservationRequest{
-	Name: "organizationalUnits/{organizational_unit}/reservations/{reservation}",
+	Name: "organizationalUnits/my-organizational-unit/reservations/my-reservation",
 })
 if err != nil {
 	return err
 }
+fmt.Println(reservation.String())
 ```
 
 ## List
@@ -104,15 +108,13 @@ Lists a site's reservations.
 | `OrderBy` | `string` |  | // Ordering, AIP-132, e.g. |
 
 ```go
-pager := client.Reservations.ListAutoPaging(ctx, &reservationpb.ListReservationsRequest{
-	Parent: "organizationalUnits/{organizational_unit}",
-})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for reservation, err := range client.Reservations.ListAutoPaging(ctx, &reservationpb.ListReservationsRequest{
+	Parent: "organizationalUnits/my-organizational-unit",
+}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(reservation.String())
 }
 ```
 
@@ -139,11 +141,14 @@ reservation is confirmed.
 
 ```go
 reservation, err := client.Reservations.Update(ctx, &reservationpb.UpdateReservationRequest{
-	Reservation: &reservationpb.Reservation{ /* … */ },
+	Reservation: &reservationpb.Reservation{
+		Hold: "organizationalUnits/my-organizational-unit/holds/my-hold",
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(reservation.String())
 ```
 
 ## Cancel
@@ -167,11 +172,12 @@ nothing.
 
 ```go
 reservation, err := client.Reservations.Cancel(ctx, &reservationpb.CancelReservationRequest{
-	Name: "organizationalUnits/{organizational_unit}/reservations/{reservation}",
+	Name: "organizationalUnits/my-organizational-unit/reservations/my-reservation",
 })
 if err != nil {
 	return err
 }
+fmt.Println(reservation.String())
 ```
 
 ## Reschedule
@@ -203,10 +209,11 @@ repeating the call with the same hold returns the same replacement.
 
 ```go
 reservation, err := client.Reservations.Reschedule(ctx, &reservationpb.RescheduleReservationRequest{
-	Name: "organizationalUnits/{organizational_unit}/reservations/{reservation}",
-	Hold: "…",
+	Name: "organizationalUnits/my-organizational-unit/reservations/my-reservation",
+	Hold: "organizationalUnits/my-organizational-unit/holds/my-hold",
 })
 if err != nil {
 	return err
 }
+fmt.Println(reservation.String())
 ```

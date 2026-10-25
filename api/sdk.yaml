@@ -67,17 +67,11 @@ docs:
     turns holds into reservations, for any bookable resource: rooms, bays,
     desks, people.
   recipes:
-    - title: Flows
-      body: |
-        The flows the API documents (book, hold expiry, reschedule, cancel,
-        webhook delivery) are written out step by step in
-        [`examples/flows`](examples/flows), one file per flow; its README
-        has a snippet of each.
     - title: Webhooks
       body: |
         `freebusy.ParseWebhook(r, secrets...)` verifies a delivery's Standard
         Webhooks signature and decodes it; `Event.Reservation()` and
-        `Event.Hold()` decode its data. See [`examples/webhooks`](examples/webhooks).
+        `Event.Hold()` decode its data. See [`examples/booking`](examples/booking).
 
 publish:
   regenerate:
@@ -90,6 +84,9 @@ languages:
     package: freebusy
     go_version: "1.26"
     custom_files: custom
+    # One hand-written example (examples/booking) instead of a skeleton per
+    # service.
+    examples: false
     gapic:
       version: 0.65.0
   typescript:

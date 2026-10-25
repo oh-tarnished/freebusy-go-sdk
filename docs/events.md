@@ -59,11 +59,12 @@ make the write conditional.
 
 ```go
 event, err := client.Events.Get(ctx, &eventpb.GetEventRequest{
-	Name: "calendars/{calendar}/events/{event}",
+	Name: "calendars/my-calendar/events/my-event",
 })
 if err != nil {
 	return err
 }
+fmt.Println(event.String())
 ```
 
 ## List
@@ -105,15 +106,13 @@ expansion needs a window and lives in ExpandEvent.
 | `ShowDeleted` | `bool` |  | // Include soft-deleted events in the result. |
 
 ```go
-pager := client.Events.ListAutoPaging(ctx, &eventpb.ListEventsRequest{
-	Parent: "calendars/{calendar}",
-})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for event, err := range client.Events.ListAutoPaging(ctx, &eventpb.ListEventsRequest{
+	Parent: "calendars/my-calendar",
+}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(event.String())
 }
 ```
 
@@ -149,12 +148,13 @@ which name a gap belonged to.
 
 ```go
 batchGetEventsResponse, err := client.Events.BatchGet(ctx, &eventpb.BatchGetEventsRequest{
-	Parent: "calendars/{calendar}",
-	Names: []string{ /* … */ },
+	Parent: "calendars/my-calendar",
+	Names: []string{"calendars/my-calendar/events/my-event"},
 })
 if err != nil {
 	return err
 }
+fmt.Println(batchGetEventsResponse.String())
 ```
 
 ## New
@@ -190,12 +190,15 @@ supply `event_id` if the caller needs retry safety.
 
 ```go
 event, err := client.Events.New(ctx, &eventpb.CreateEventRequest{
-	Parent: "calendars/{calendar}",
-	Event: &eventpb.Event{ /* … */ },
+	Parent: "calendars/my-calendar",
+	Event: &eventpb.Event{
+		Start: &eventpb.CalendarTime{},
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(event.String())
 ```
 
 ## Update
@@ -230,11 +233,14 @@ Idempotent. Pass the `etag` read from Get to make the write conditional.
 
 ```go
 event, err := client.Events.Update(ctx, &eventpb.UpdateEventRequest{
-	Event: &eventpb.Event{ /* … */ },
+	Event: &eventpb.Event{
+		Start: &eventpb.CalendarTime{},
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(event.String())
 ```
 
 ## Delete
@@ -266,7 +272,7 @@ NOT_FOUND rather than succeeding silently.
 
 ```go
 if err := client.Events.Delete(ctx, &eventpb.DeleteEventRequest{
-	Name: "calendars/{calendar}/events/{event}",
+	Name: "calendars/my-calendar/events/my-event",
 }); err != nil {
 	return err
 }
@@ -318,16 +324,14 @@ Paginated like List, with its own `page_size` default of 250.
 | `PageToken` | `string` |  | // Page token from a previous ExpandEventResponse.next_page_token. |
 
 ```go
-pager := client.Events.ExpandAutoPaging(ctx, &eventpb.ExpandEventRequest{
-	Name: "calendars/{calendar}/events/{event}",
-	Window: &interval.Interval{ /* … */ },
-})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for event, err := range client.Events.ExpandAutoPaging(ctx, &eventpb.ExpandEventRequest{
+	Name: "calendars/my-calendar/events/my-event",
+	Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
+}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(event.String())
 }
 ```
 
@@ -357,9 +361,10 @@ event as it was.
 
 ```go
 event, err := client.Events.Undelete(ctx, &eventpb.UndeleteEventRequest{
-	Name: "calendars/{calendar}/events/{event}",
+	Name: "calendars/my-calendar/events/my-event",
 })
 if err != nil {
 	return err
 }
+fmt.Println(event.String())
 ```

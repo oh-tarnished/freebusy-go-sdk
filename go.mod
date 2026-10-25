@@ -1,9 +1,10 @@
 module github.com/shokki-engineering/freebusy-go
 
-go 1.26.0
+go 1.26.4
 
 require (
 	github.com/googleapis/gax-go/v2 v2.27.0
+	github.com/the-protobuf-project/resourcename v0.0.0-20260616190751-3e187a5d3da5
 	google.golang.org/api v0.308.0
 	google.golang.org/genproto v0.0.0-20261012220534-4341edf3f941
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261019180522-ce908d29299b

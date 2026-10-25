@@ -47,11 +47,12 @@ make the write conditional.
 
 ```go
 organization, err := client.Organizations.Get(ctx, &organizationpb.GetOrganizationRequest{
-	Name: "organizations/{organization}",
+	Name: "organizations/my-organization",
 })
 if err != nil {
 	return err
 }
+fmt.Println(organization.String())
 ```
 
 ## List
@@ -88,13 +89,11 @@ fields. Results carry no guaranteed order.
 | `ShowDeleted` | `bool` |  | // Include soft-deleted organizations in the result. |
 
 ```go
-pager := client.Organizations.ListAutoPaging(ctx, &organizationpb.ListOrganizationsRequest{})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for organization, err := range client.Organizations.ListAutoPaging(ctx, &organizationpb.ListOrganizationsRequest{}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(organization.String())
 }
 ```
 
@@ -130,11 +129,14 @@ supply `organization_id` if the caller needs retry safety.
 
 ```go
 organization, err := client.Organizations.New(ctx, &organizationpb.CreateOrganizationRequest{
-	Organization: &organizationpb.Organization{ /* … */ },
+	Organization: &organizationpb.Organization{
+		DisplayNames: []string{"display-names"},
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(organization.String())
 ```
 
 ## Update
@@ -169,11 +171,14 @@ Idempotent. Pass the `etag` read from Get to make the write conditional.
 
 ```go
 organization, err := client.Organizations.Update(ctx, &organizationpb.UpdateOrganizationRequest{
-	Organization: &organizationpb.Organization{ /* … */ },
+	Organization: &organizationpb.Organization{
+		DisplayNames: []string{"display-names"},
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(organization.String())
 ```
 
 ## Delete
@@ -205,7 +210,7 @@ NOT_FOUND rather than succeeding silently.
 
 ```go
 if err := client.Organizations.Delete(ctx, &organizationpb.DeleteOrganizationRequest{
-	Name: "organizations/{organization}",
+	Name: "organizations/my-organization",
 }); err != nil {
 	return err
 }
@@ -237,9 +242,10 @@ organization as it was.
 
 ```go
 organization, err := client.Organizations.Undelete(ctx, &organizationpb.UndeleteOrganizationRequest{
-	Name: "organizations/{organization}",
+	Name: "organizations/my-organization",
 })
 if err != nil {
 	return err
 }
+fmt.Println(organization.String())
 ```

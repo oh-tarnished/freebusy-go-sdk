@@ -47,11 +47,12 @@ make the write conditional.
 
 ```go
 resource, err := client.Resources.Get(ctx, &resourcepb.GetResourceRequest{
-	Name: "resources/{resource}",
+	Name: "resources/my-resource",
 })
 if err != nil {
 	return err
 }
+fmt.Println(resource.String())
 ```
 
 ## List
@@ -91,13 +92,11 @@ order.
 | `ShowDeleted` | `bool` |  | // Include soft-deleted resources in the result. |
 
 ```go
-pager := client.Resources.ListAutoPaging(ctx, &resourcepb.ListResourcesRequest{})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for resource, err := range client.Resources.ListAutoPaging(ctx, &resourcepb.ListResourcesRequest{}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(resource.String())
 }
 ```
 
@@ -133,11 +132,12 @@ supply `resource_id` if the caller needs retry safety.
 
 ```go
 resource, err := client.Resources.New(ctx, &resourcepb.CreateResourceRequest{
-	Resource: &resourcepb.Resource{ /* … */ },
+	Resource: &resourcepb.Resource{},
 })
 if err != nil {
 	return err
 }
+fmt.Println(resource.String())
 ```
 
 ## Update
@@ -172,11 +172,12 @@ Idempotent. Pass the `etag` read from Get to make the write conditional.
 
 ```go
 resource, err := client.Resources.Update(ctx, &resourcepb.UpdateResourceRequest{
-	Resource: &resourcepb.Resource{ /* … */ },
+	Resource: &resourcepb.Resource{},
 })
 if err != nil {
 	return err
 }
+fmt.Println(resource.String())
 ```
 
 ## Delete
@@ -209,7 +210,7 @@ NOT_FOUND rather than succeeding silently.
 
 ```go
 if err := client.Resources.Delete(ctx, &resourcepb.DeleteResourceRequest{
-	Name: "resources/{resource}",
+	Name: "resources/my-resource",
 }); err != nil {
 	return err
 }
@@ -241,9 +242,10 @@ resource as it was.
 
 ```go
 resource, err := client.Resources.Undelete(ctx, &resourcepb.UndeleteResourceRequest{
-	Name: "resources/{resource}",
+	Name: "resources/my-resource",
 })
 if err != nil {
 	return err
 }
+fmt.Println(resource.String())
 ```

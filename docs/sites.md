@@ -48,11 +48,12 @@ make the write conditional.
 
 ```go
 organizationalUnit, err := client.Sites.Get(ctx, &organizationalunitpb.GetOrganizationalUnitRequest{
-	Name: "organizationalUnits/{organizational_unit}",
+	Name: "organizationalUnits/my-organizational-unit",
 })
 if err != nil {
 	return err
 }
+fmt.Println(organizationalUnit.String())
 ```
 
 ## List
@@ -91,13 +92,11 @@ Results carry no guaranteed order.
 | `ShowDeleted` | `bool` |  | // Include soft-deleted organizational units in the result. |
 
 ```go
-pager := client.Sites.ListAutoPaging(ctx, &organizationalunitpb.ListOrganizationalUnitsRequest{})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for organizationalUnit, err := range client.Sites.ListAutoPaging(ctx, &organizationalunitpb.ListOrganizationalUnitsRequest{}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(organizationalUnit.String())
 }
 ```
 
@@ -133,11 +132,14 @@ unit; supply `organizational_unit_id` if the caller needs retry safety.
 
 ```go
 organizationalUnit, err := client.Sites.New(ctx, &organizationalunitpb.CreateOrganizationalUnitRequest{
-	OrganizationalUnit: &organizationalunitpb.OrganizationalUnit{ /* … */ },
+	OrganizationalUnit: &organizationalunitpb.OrganizationalUnit{
+		DisplayNames: []string{"display-names"},
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(organizationalUnit.String())
 ```
 
 ## Update
@@ -172,11 +174,14 @@ Idempotent. Pass the `etag` read from Get to make the write conditional.
 
 ```go
 organizationalUnit, err := client.Sites.Update(ctx, &organizationalunitpb.UpdateOrganizationalUnitRequest{
-	OrganizationalUnit: &organizationalunitpb.OrganizationalUnit{ /* … */ },
+	OrganizationalUnit: &organizationalunitpb.OrganizationalUnit{
+		DisplayNames: []string{"display-names"},
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(organizationalUnit.String())
 ```
 
 ## Delete
@@ -208,7 +213,7 @@ NOT_FOUND rather than succeeding silently.
 
 ```go
 if err := client.Sites.Delete(ctx, &organizationalunitpb.DeleteOrganizationalUnitRequest{
-	Name: "organizationalUnits/{organizational_unit}",
+	Name: "organizationalUnits/my-organizational-unit",
 }); err != nil {
 	return err
 }
@@ -240,9 +245,10 @@ and returns the organizational unit as it was.
 
 ```go
 organizationalUnit, err := client.Sites.Undelete(ctx, &organizationalunitpb.UndeleteOrganizationalUnitRequest{
-	Name: "organizationalUnits/{organizational_unit}",
+	Name: "organizationalUnits/my-organizational-unit",
 })
 if err != nil {
 	return err
 }
+fmt.Println(organizationalUnit.String())
 ```

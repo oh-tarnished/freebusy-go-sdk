@@ -48,11 +48,14 @@ later read returns.
 
 ```go
 webhook, err := client.Webhooks.New(ctx, &webhookpb.CreateWebhookRequest{
-	Webhook: &webhookpb.Webhook{ /* … */ },
+	Webhook: &webhookpb.Webhook{
+		Uri: "uri",
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(webhook.String())
 ```
 
 ## Get
@@ -71,11 +74,12 @@ Retrieves one webhook, without its secret.
 
 ```go
 webhook, err := client.Webhooks.Get(ctx, &webhookpb.GetWebhookRequest{
-	Name: "webhooks/{webhook}",
+	Name: "webhooks/my-webhook",
 })
 if err != nil {
 	return err
 }
+fmt.Println(webhook.String())
 ```
 
 ## List
@@ -97,13 +101,11 @@ Lists webhooks, without their secrets.
 | `PageToken` | `string` |  | // Page token from a previous ListWebhooksResponse.next_page_token. |
 
 ```go
-pager := client.Webhooks.ListAutoPaging(ctx, &webhookpb.ListWebhooksRequest{})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for webhook, err := range client.Webhooks.ListAutoPaging(ctx, &webhookpb.ListWebhooksRequest{}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(webhook.String())
 }
 ```
 
@@ -124,11 +126,14 @@ Updates a webhook: its endpoint, event types or site.
 
 ```go
 webhook, err := client.Webhooks.Update(ctx, &webhookpb.UpdateWebhookRequest{
-	Webhook: &webhookpb.Webhook{ /* … */ },
+	Webhook: &webhookpb.Webhook{
+		Uri: "uri",
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(webhook.String())
 ```
 
 ## Pause
@@ -148,11 +153,12 @@ sent; deliveries already pending wait. Idempotent.
 
 ```go
 webhook, err := client.Webhooks.Pause(ctx, &webhookpb.PauseWebhookRequest{
-	Name: "webhooks/{webhook}",
+	Name: "webhooks/my-webhook",
 })
 if err != nil {
 	return err
 }
+fmt.Println(webhook.String())
 ```
 
 ## Resume
@@ -171,11 +177,12 @@ Starts sending a paused webhook changes again, from now on. Idempotent.
 
 ```go
 webhook, err := client.Webhooks.Resume(ctx, &webhookpb.ResumeWebhookRequest{
-	Name: "webhooks/{webhook}",
+	Name: "webhooks/my-webhook",
 })
 if err != nil {
 	return err
 }
+fmt.Println(webhook.String())
 ```
 
 ## Delete
@@ -196,7 +203,7 @@ Deletes a webhook; with force, its deliveries too.
 
 ```go
 if err := client.Webhooks.Delete(ctx, &webhookpb.DeleteWebhookRequest{
-	Name: "webhooks/{webhook}",
+	Name: "webhooks/my-webhook",
 }); err != nil {
 	return err
 }
@@ -220,11 +227,12 @@ signatures in one header -- so a receiver can switch without missing one.
 
 ```go
 webhook, err := client.Webhooks.RotateSecret(ctx, &webhookpb.RotateWebhookSecretRequest{
-	Name: "webhooks/{webhook}",
+	Name: "webhooks/my-webhook",
 })
 if err != nil {
 	return err
 }
+fmt.Println(webhook.String())
 ```
 
 # client.Webhooks.Deliveries
@@ -248,11 +256,12 @@ Retrieves one delivery.
 
 ```go
 delivery, err := client.Webhooks.Deliveries.Get(ctx, &webhookpb.GetDeliveryRequest{
-	Name: "webhooks/{webhook}/deliveries/{delivery}",
+	Name: "webhooks/my-webhook/deliveries/my-deliverie",
 })
 if err != nil {
 	return err
 }
+fmt.Println(delivery.String())
 ```
 
 ## List
@@ -277,15 +286,13 @@ Lists a webhook's deliveries.
 | `OrderBy` | `string` |  | // Ordering, AIP-132, e.g. |
 
 ```go
-pager := client.Webhooks.Deliveries.ListAutoPaging(ctx, &webhookpb.ListDeliveriesRequest{
-	Parent: "webhooks/{webhook}",
-})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for delivery, err := range client.Webhooks.Deliveries.ListAutoPaging(ctx, &webhookpb.ListDeliveriesRequest{
+	Parent: "webhooks/my-webhook",
+}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(delivery.String())
 }
 ```
 
@@ -307,9 +314,10 @@ recorded, not the record as it stands now.
 
 ```go
 delivery, err := client.Webhooks.Deliveries.Retry(ctx, &webhookpb.RetryDeliveryRequest{
-	Name: "webhooks/{webhook}/deliveries/{delivery}",
+	Name: "webhooks/my-webhook/deliveries/my-deliverie",
 })
 if err != nil {
 	return err
 }
+fmt.Println(delivery.String())
 ```

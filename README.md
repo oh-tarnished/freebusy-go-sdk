@@ -27,14 +27,13 @@ call.
 - [Pagination](#pagination)
 - [Concurrency control (etags)](#concurrency-control-etags)
 - [Retries and timeouts](#retries-and-timeouts)
-- [Flows](#flows)
 - [Webhooks](#webhooks)
 - [Examples](#examples)
 - [Versioning](#versioning)
 
 ## How it fits together
 
-You use package `freebusy` (the client and its services) and the `pb/…pb`
+You use package `freebusy` (the client and its services) and the `pb/<package>pb`
 packages (the API's request and response messages). Underneath, Google's
 GAPIC clients (`internal/gapic`, not importable) call the gRPC stubs:
 
@@ -153,8 +152,12 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/shokki-engineering/freebusy-go"
+	"github.com/shokki-engineering/freebusy-go/pb/allocationpb"
+	"google.golang.org/genproto/googleapis/type/interval"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func main() {
@@ -165,7 +168,10 @@ func main() {
 	}
 	defer client.Close()
 
-	res, err := client.Availability.ComputeAvailability(ctx, &allocationpb.ComputeAvailabilityRequest{ /* … */ })
+	res, err := client.Availability.ComputeAvailability(ctx, &allocationpb.ComputeAvailabilityRequest{
+		Parent: "organizationalUnits/my-organizational-unit",
+		Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -255,12 +261,13 @@ AllocationService is the read-only half of the engine: it answers how much is fr
 
 ```go
 computeAvailabilityResponse, err := client.Availability.ComputeAvailability(ctx, &allocationpb.ComputeAvailabilityRequest{
-	Parent: "…",
-	Window: &interval.Interval{ /* … */ },
+	Parent: "organizationalUnits/my-organizational-unit",
+	Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
 })
 if err != nil {
 	return err
 }
+fmt.Println(computeAvailabilityResponse.String())
 ```
 
 ### Holds
@@ -278,12 +285,15 @@ HoldService takes and releases expiring claims on resources. `client.Holds` is a
 
 ```go
 hold, err := client.Holds.New(ctx, &allocationpb.CreateHoldRequest{
-	Parent: "organizationalUnits/{organizational_unit}",
-	Hold: &allocationpb.Hold{ /* … */ },
+	Parent: "organizationalUnits/my-organizational-unit",
+	Hold: &allocationpb.Hold{
+		Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(hold.String())
 ```
 
 ### Reservations
@@ -302,12 +312,15 @@ ReservationService turns holds into confirmed bookings, updates and cancels them
 
 ```go
 reservation, err := client.Reservations.New(ctx, &reservationpb.CreateReservationRequest{
-	Parent: "organizationalUnits/{organizational_unit}",
-	Reservation: &reservationpb.Reservation{ /* … */ },
+	Parent: "organizationalUnits/my-organizational-unit",
+	Reservation: &reservationpb.Reservation{
+		Hold: "organizationalUnits/my-organizational-unit/holds/my-hold",
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(reservation.String())
 ```
 
 ### Webhooks
@@ -329,11 +342,14 @@ WebhookService subscribes endpoints to changes in holds, reservations and invent
 
 ```go
 webhook, err := client.Webhooks.New(ctx, &webhookpb.CreateWebhookRequest{
-	Webhook: &webhookpb.Webhook{ /* … */ },
+	Webhook: &webhookpb.Webhook{
+		Uri: "uri",
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(webhook.String())
 ```
 
 ### Webhooks.Deliveries
@@ -348,11 +364,12 @@ if err != nil {
 
 ```go
 delivery, err := client.Webhooks.Deliveries.Get(ctx, &webhookpb.GetDeliveryRequest{
-	Name: "webhooks/{webhook}/deliveries/{delivery}",
+	Name: "webhooks/my-webhook/deliveries/my-deliverie",
 })
 if err != nil {
 	return err
 }
+fmt.Println(delivery.String())
 ```
 
 ### Organizations
@@ -371,11 +388,12 @@ Organizations manages the RFC 4519 'organization' object class, section 3.8 <htt
 
 ```go
 organization, err := client.Organizations.Get(ctx, &organizationpb.GetOrganizationRequest{
-	Name: "organizations/{organization}",
+	Name: "organizations/my-organization",
 })
 if err != nil {
 	return err
 }
+fmt.Println(organization.String())
 ```
 
 ### Sites
@@ -395,11 +413,12 @@ OrganizationalUnits manages the RFC 4519 'organizationalUnit' object class, sect
 
 ```go
 organizationalUnit, err := client.Sites.Get(ctx, &organizationalunitpb.GetOrganizationalUnitRequest{
-	Name: "organizationalUnits/{organizational_unit}",
+	Name: "organizationalUnits/my-organizational-unit",
 })
 if err != nil {
 	return err
 }
+fmt.Println(organizationalUnit.String())
 ```
 
 ### Resources
@@ -418,11 +437,12 @@ Resources manages the RFC 9073 VRESOURCE component as a catalogue, section 7.3 <
 
 ```go
 resource, err := client.Resources.Get(ctx, &resourcepb.GetResourceRequest{
-	Name: "resources/{resource}",
+	Name: "resources/my-resource",
 })
 if err != nil {
 	return err
 }
+fmt.Println(resource.String())
 ```
 
 ### Calendars
@@ -442,11 +462,12 @@ Calendars manages the collections that Events belong to, RFC 5545 section 3.4 <h
 
 ```go
 calendar, err := client.Calendars.Get(ctx, &calendarpb.GetCalendarRequest{
-	Name: "calendars/{calendar}",
+	Name: "calendars/my-calendar",
 })
 if err != nil {
 	return err
 }
+fmt.Println(calendar.String())
 ```
 
 ### Events
@@ -467,11 +488,12 @@ Events manages RFC 5545 events as resources. `client.Events` is a `EventService`
 
 ```go
 event, err := client.Events.Get(ctx, &eventpb.GetEventRequest{
-	Name: "calendars/{calendar}/events/{event}",
+	Name: "calendars/my-calendar/events/my-event",
 })
 if err != nil {
 	return err
 }
+fmt.Println(event.String())
 ```
 
 ### Availabilities
@@ -490,11 +512,12 @@ Availabilities manages when a calendar's owner may be scheduled. `client.Availab
 
 ```go
 availability, err := client.Availabilities.Get(ctx, &availabilitypb.GetAvailabilityRequest{
-	Name: "calendars/{calendar}/availabilities/{availability}",
+	Name: "calendars/my-calendar/availabilities/my-availabilitie",
 })
 if err != nil {
 	return err
 }
+fmt.Println(availability.String())
 ```
 
 ## Errors
@@ -519,7 +542,7 @@ case err != nil:
 ```
 
 Every status code has a sentinel (`ErrInvalidArgument`, `ErrNotFound`,
-`ErrAlreadyExists`, `ErrFailedPrecondition`, `ErrAborted`, `ErrUnavailable`, …). The
+`ErrAlreadyExists`, `ErrFailedPrecondition`, `ErrAborted`, `ErrUnavailable` and the rest). The
 API's error reasons have their own, matching on reason and domain:
 
 | Sentinel | Reason | Code | What to do |
@@ -562,21 +585,19 @@ API's error reasons have their own, matching on reason and domain:
 ## Pagination
 
 A list method returns one page, the response message with its
-`next_page_token`; its `…AutoPaging` twin walks every item, fetching pages
+`next_page_token`; its `AutoPaging` twin walks every item, fetching pages
 as it goes:
 
 ```go
-pager := client.Availability.SearchAvailabilityAutoPaging(ctx, &allocationpb.SearchAvailabilityRequest{…})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
+for item, err := range client.Availability.SearchAvailabilityAutoPaging(ctx, &allocationpb.SearchAvailabilityRequest{
+	Parent: "organizations/my-organization",
+	Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
+}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(item)
 }
-if err := pager.Err(); err != nil {
-	return err
-}
-
-// or
-for item, err := range pager.All() { … }
 ```
 
 ## Concurrency control (etags)
@@ -586,8 +607,8 @@ sends the etag it read and starts over when another writer got there first:
 
 ```go
 updated, err := client.Reservations.Modify(ctx, name, func(r *reservationpb.Reservation) ([]string, error) {
-	// change r, and return the paths of the fields you changed
-	return []string{"…"}, nil
+	r.DisplayName = "Renamed"
+	return []string{"display_name"}, nil
 })
 ```
 
@@ -597,40 +618,20 @@ A call failing with `UNAVAILABLE` is retried 2 times with exponential
 backoff (`option.WithMaxRetries`). `option.WithTimeout` bounds each call,
 retries included; a context deadline bounds it too.
 
-## Flows
-
-The flows the API documents (book, hold expiry, reschedule, cancel,
-webhook delivery) are written out step by step in
-[`examples/flows`](examples/flows), one file per flow; its README
-has a snippet of each.
-
 ## Webhooks
 
 `freebusy.ParseWebhook(r, secrets...)` verifies a delivery's Standard
 Webhooks signature and decodes it; `Event.Reservation()` and
-`Event.Hold()` decode its data. See [`examples/webhooks`](examples/webhooks).
+`Event.Hold()` decode its data. See [`examples/booking`](examples/booking).
 
 ## Examples
 
 Under [`examples/`](examples):
 
-- [`flows`](examples/flows)
-- [`hotel`](examples/hotel)
-- [`parking`](examples/parking)
-- [`quickstart`](examples/quickstart)
-- [`webhooks`](examples/webhooks)
-- [`availability`](examples/availability): a starting point for `client.Availability`.
-- [`holds`](examples/holds): a starting point for `client.Holds`.
-- [`reservations`](examples/reservations): a starting point for `client.Reservations`.
-- [`organizations`](examples/organizations): a starting point for `client.Organizations`.
-- [`sites`](examples/sites): a starting point for `client.Sites`.
-- [`resources`](examples/resources): a starting point for `client.Resources`.
-- [`calendars`](examples/calendars): a starting point for `client.Calendars`.
-- [`events`](examples/events): a starting point for `client.Events`.
-- [`availabilities`](examples/availabilities): a starting point for `client.Availabilities`.
+- [`booking`](examples/booking)
 
 ```sh
-FREEBUSY_ENDPOINT=localhost:50051 FREEBUSY_INSECURE=true go run ./examples/flows
+FREEBUSY_ENDPOINT=localhost:50051 FREEBUSY_INSECURE=true go run ./examples/booking
 ```
 
 ## Versioning

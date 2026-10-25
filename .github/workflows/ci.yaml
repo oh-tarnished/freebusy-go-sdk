@@ -72,3 +72,7 @@ jobs:
     uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.0
     with:
       scan-args: --recursive ./
+      # Fails the job on a known vulnerability. The SARIF stays a run
+      # artifact: uploading it to code scanning needs GitHub Advanced
+      # Security, which a private repository may not have.
+      upload-sarif: false

@@ -51,12 +51,13 @@ Computes availability across a site's resources, bucketed by slot or day.
 
 ```go
 computeAvailabilityResponse, err := client.Availability.ComputeAvailability(ctx, &allocationpb.ComputeAvailabilityRequest{
-	Parent: "…",
-	Window: &interval.Interval{ /* … */ },
+	Parent: "organizationalUnits/my-organizational-unit",
+	Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
 })
 if err != nil {
 	return err
 }
+fmt.Println(computeAvailabilityResponse.String())
 ```
 
 ## CheckAvailability
@@ -82,12 +83,13 @@ returned. CreateHold is what actually secures anything.
 
 ```go
 checkAvailabilityResponse, err := client.Availability.CheckAvailability(ctx, &allocationpb.CheckAvailabilityRequest{
-	Parent: "…",
-	Window: &interval.Interval{ /* … */ },
+	Parent: "organizationalUnits/my-organizational-unit",
+	Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
 })
 if err != nil {
 	return err
 }
+fmt.Println(checkAvailabilityResponse.String())
 ```
 
 ## BatchComputeAvailability
@@ -110,11 +112,15 @@ candidate resource's calendar.
 
 ```go
 batchComputeAvailabilityResponse, err := client.Availability.BatchComputeAvailability(ctx, &allocationpb.BatchComputeAvailabilityRequest{
-	Requests: []*allocationpb.ComputeAvailabilityRequest{ /* … */ },
+	Requests: []*allocationpb.ComputeAvailabilityRequest{{
+		Parent: "parent",
+		Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
+	}},
 })
 if err != nil {
 	return err
 }
+fmt.Println(batchComputeAvailabilityResponse.String())
 ```
 
 ## SearchAvailability
@@ -148,15 +154,13 @@ thousands of resources.
 | `Facets` | `[]string` |  | // Fields to count matching resources by, returned in // SearchAvailabilityResponse.facets: `resource_types`, // `organizational_unit` or an `attributes.<path>`, e.g. |
 
 ```go
-pager := client.Availability.SearchAvailabilityAutoPaging(ctx, &allocationpb.SearchAvailabilityRequest{
-	Parent: "…",
-	Window: &interval.Interval{ /* … */ },
-})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for availabilityMatch, err := range client.Availability.SearchAvailabilityAutoPaging(ctx, &allocationpb.SearchAvailabilityRequest{
+	Parent: "organizations/my-organization",
+	Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
+}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(availabilityMatch.String())
 }
 ```

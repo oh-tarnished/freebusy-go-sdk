@@ -60,11 +60,12 @@ make the write conditional.
 
 ```go
 calendar, err := client.Calendars.Get(ctx, &calendarpb.GetCalendarRequest{
-	Name: "calendars/{calendar}",
+	Name: "calendars/my-calendar",
 })
 if err != nil {
 	return err
 }
+fmt.Println(calendar.String())
 ```
 
 ## List
@@ -101,13 +102,11 @@ fields. Results carry no guaranteed order.
 | `ShowDeleted` | `bool` |  | // Include soft-deleted calendars in the result. |
 
 ```go
-pager := client.Calendars.ListAutoPaging(ctx, &calendarpb.ListCalendarsRequest{})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for calendar, err := range client.Calendars.ListAutoPaging(ctx, &calendarpb.ListCalendarsRequest{}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(calendar.String())
 }
 ```
 
@@ -143,11 +142,14 @@ supply `calendar_id` if the caller needs retry safety.
 
 ```go
 calendar, err := client.Calendars.New(ctx, &calendarpb.CreateCalendarRequest{
-	Calendar: &calendarpb.Calendar{ /* … */ },
+	Calendar: &calendarpb.Calendar{
+		DisplayName: "display-name",
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(calendar.String())
 ```
 
 ## Update
@@ -182,11 +184,14 @@ Idempotent. Pass the `etag` read from Get to make the write conditional.
 
 ```go
 calendar, err := client.Calendars.Update(ctx, &calendarpb.UpdateCalendarRequest{
-	Calendar: &calendarpb.Calendar{ /* … */ },
+	Calendar: &calendarpb.Calendar{
+		DisplayName: "display-name",
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(calendar.String())
 ```
 
 ## Delete
@@ -220,7 +225,7 @@ NOT_FOUND rather than succeeding silently.
 
 ```go
 if err := client.Calendars.Delete(ctx, &calendarpb.DeleteCalendarRequest{
-	Name: "calendars/{calendar}",
+	Name: "calendars/my-calendar",
 }); err != nil {
 	return err
 }
@@ -252,11 +257,12 @@ calendar as it was.
 
 ```go
 calendar, err := client.Calendars.Undelete(ctx, &calendarpb.UndeleteCalendarRequest{
-	Name: "calendars/{calendar}",
+	Name: "calendars/my-calendar",
 })
 if err != nil {
 	return err
 }
+fmt.Println(calendar.String())
 ```
 
 ## QueryFreeBusy
@@ -290,10 +296,11 @@ never be handed the underlying Event.
 
 ```go
 queryFreeBusyResponse, err := client.Calendars.QueryFreeBusy(ctx, &calendarpb.QueryFreeBusyRequest{
-	Name: "calendars/{calendar}",
-	Window: &interval.Interval{ /* … */ },
+	Name: "calendars/my-calendar",
+	Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
 })
 if err != nil {
 	return err
 }
+fmt.Println(queryFreeBusyResponse.String())
 ```

@@ -52,12 +52,15 @@ hold rather than taking a second one.
 
 ```go
 hold, err := client.Holds.New(ctx, &allocationpb.CreateHoldRequest{
-	Parent: "organizationalUnits/{organizational_unit}",
-	Hold: &allocationpb.Hold{ /* … */ },
+	Parent: "organizationalUnits/my-organizational-unit",
+	Hold: &allocationpb.Hold{
+		Window: &interval.Interval{StartTime: timestamppb.Now(), EndTime: timestamppb.New(time.Now().Add(time.Hour))},
+	},
 })
 if err != nil {
 	return err
 }
+fmt.Println(hold.String())
 ```
 
 ## Get
@@ -80,11 +83,12 @@ caller never sees an ACTIVE hold that no longer reserves anything.
 
 ```go
 hold, err := client.Holds.Get(ctx, &allocationpb.GetHoldRequest{
-	Name: "organizationalUnits/{organizational_unit}/holds/{hold}",
+	Name: "organizationalUnits/my-organizational-unit/holds/my-hold",
 })
 if err != nil {
 	return err
 }
+fmt.Println(hold.String())
 ```
 
 ## List
@@ -108,15 +112,13 @@ Lists the holds taken at a site.
 | `Filter` | `string` |  | // Filter expression, AIP-160, over the hold's own fields, e.g. |
 
 ```go
-pager := client.Holds.ListAutoPaging(ctx, &allocationpb.ListHoldsRequest{
-	Parent: "organizationalUnits/{organizational_unit}",
-})
-for pager.Next() {
-	item := pager.Current()
-	_ = item
-}
-if err := pager.Err(); err != nil {
-	return err
+for hold, err := range client.Holds.ListAutoPaging(ctx, &allocationpb.ListHoldsRequest{
+	Parent: "organizationalUnits/my-organizational-unit",
+}).All() {
+	if err != nil {
+		return err
+	}
+	fmt.Println(hold.String())
 }
 ```
 
@@ -142,12 +144,13 @@ ACTIVE -- an expired hold is gone, not extendable.
 
 ```go
 hold, err := client.Holds.Extend(ctx, &allocationpb.ExtendHoldRequest{
-	Name: "organizationalUnits/{organizational_unit}/holds/{hold}",
-	Duration: &durationpb.Duration{ /* … */ },
+	Name: "organizationalUnits/my-organizational-unit/holds/my-hold",
+	Duration: durationpb.New(30 * time.Minute),
 })
 if err != nil {
 	return err
 }
+fmt.Println(hold.String())
 ```
 
 ## Release
@@ -170,11 +173,12 @@ changes nothing, because the caller's intent is already satisfied.
 
 ```go
 hold, err := client.Holds.Release(ctx, &allocationpb.ReleaseHoldRequest{
-	Name: "organizationalUnits/{organizational_unit}/holds/{hold}",
+	Name: "organizationalUnits/my-organizational-unit/holds/my-hold",
 })
 if err != nil {
 	return err
 }
+fmt.Println(hold.String())
 ```
 
 ## Delete
@@ -198,7 +202,7 @@ never freed by a path that leaves no audit trail.
 
 ```go
 if err := client.Holds.Delete(ctx, &allocationpb.DeleteHoldRequest{
-	Name: "organizationalUnits/{organizational_unit}/holds/{hold}",
+	Name: "organizationalUnits/my-organizational-unit/holds/my-hold",
 }); err != nil {
 	return err
 }
