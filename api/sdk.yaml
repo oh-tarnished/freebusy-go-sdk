@@ -1,0 +1,101 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/the-protobuf-project/sdk/main/schema/sdk.schema.json
+#
+# The freebusy SDKs: freebusy's own services (availability, holds,
+# reservations, webhooks) and the RFC services it serves (organizations,
+# sites, resources, calendars, events, availabilities), in one client.
+version: 1
+name: freebusy
+title: freebusy
+description: Availability, holds, reservations and webhooks for anything that can be booked.
+organization: shokki-engineering
+homepage: https://freebusy.shokki.engineering
+
+license:
+  spdx: Apache-2.0
+  copyright: 2026 Shokki Engineering
+  notice: true
+
+client:
+  endpoint: freebusy.shokki.engineering:443
+  tls: true
+  env_prefix: FREEBUSY
+  auth:
+    type: none
+  max_retries: 2
+
+source:
+  # freebusy's own module is the input; the RFC services it serves come
+  # from the RFC module's image (buf build <module> -o rfc.binpb).
+  input: buf.build/shokki-engineering/freebusy:42f6e4ec44de415c8589688bb10f9dfa
+  references:
+    - module: buf.build/the-protobuf-project/rfc:cc82b3b15066438ba44e89dad69e9f8a
+      image: rfc.binpb
+
+services:
+  - proto: freebusy.allocation.v1.AllocationService
+    name: Availability
+  - proto: freebusy.allocation.v1.HoldService
+  - proto: freebusy.reservation.v1.ReservationService
+  - proto: freebusy.webhook.v1.WebhookService
+  - proto: protobuf.rfc4519.organization.v1.Organizations
+  - proto: protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits
+    name: Sites
+    nest: [Resources]
+  - proto: protobuf.rfc9073.resource.v1.Resources
+  - proto: protobuf.rfc5545.calendar.v1.Calendars
+  - proto: protobuf.rfc5545.event.v1.Events
+  - proto: protobuf.rfc7953.availability.v1.Availabilities
+    type: AvailabilitiesService
+
+resources:
+  the-protobuf-project.org/OrganizationalUnit: {singular: site, plural: sites}
+
+methods:
+  protobuf.rfc5545.calendar.v1.Calendars.QueryFreeBusy: {name: QueryFreeBusy}
+
+naming:
+  collisions:
+    - {package: protobuf.rfc5545.event.v1, prefix: Event}
+    - {package: protobuf.rfc5545.calendar.v1, prefix: Calendar}
+
+errors:
+  sentinels: true
+
+docs:
+  intro: |
+    freebusy answers what is free, holds it while a customer decides, and
+    turns holds into reservations, for any bookable resource: rooms, bays,
+    desks, people.
+  recipes:
+    - title: Flows
+      body: |
+        The flows the API documents (book, hold expiry, reschedule, cancel,
+        webhook delivery) are written out step by step in
+        [`examples/flows`](examples/flows), one file per flow; its README
+        has a snippet of each.
+    - title: Webhooks
+      body: |
+        `freebusy.ParseWebhook(r, secrets...)` verifies a delivery's Standard
+        Webhooks signature and decodes it; `Event.Reservation()` and
+        `Event.Hold()` decode its data. See [`examples/webhooks`](examples/webhooks).
+
+publish:
+  regenerate:
+    event: api-release
+    schedule: "0 6 * * 1"
+
+languages:
+  go:
+    module: github.com/shokki-engineering/freebusy-go
+    package: freebusy
+    go_version: "1.26"
+    custom_files: custom
+    gapic:
+      version: 0.65.0
+  typescript:
+    package: "@shokki-engineering/freebusy"
+  python:
+    package: shokki-freebusy
+    module: freebusy
+    repository: shokki-engineering/freebusy-python
+    custom_files: custom-python
