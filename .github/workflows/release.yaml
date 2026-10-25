@@ -54,7 +54,7 @@ jobs:
           output-file: sbom.spdx.json
           upload-artifact: false
       - name: SLSA build provenance
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: source-*.zip
       - name: SBOM attestation
