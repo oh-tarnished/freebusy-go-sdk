@@ -52,7 +52,7 @@ jobs:
           sed -i -E "s#(${MODULE//./\\.})(:[A-Za-z0-9._-]+)?#\1:${COMMIT}#g" sdk.yaml buf.gen.yaml
       - name: Generate, build and test
         run: ./scripts/generate.sh
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@v8
         with:
           branch: regenerate/api
           commit-message: 'chore: regenerate from the API'
