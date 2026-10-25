@@ -1,6 +1,8 @@
 name: Release
 
-# On a version tag: test, publish the tag's CHANGELOG.md section as the
+# On a version tag, or after a Dependabot update of go.mod merged and green
+# on main (released as the next patch version): test, publish the release
+# notes -- the tag's CHANGELOG.md section, or the updates' commits -- as the
 # GitHub release with an SPDX SBOM of the module and a source archive, both
 # with SLSA build provenance (GitHub artifact attestations, Sigstore), and
 # have the Go module proxy and pkg.go.dev fetch the version (a Go module is
@@ -9,23 +11,84 @@ name: Release
 on:
   push:
     tags: ['v*']
+  # A Dependabot update of the dependencies, merged and green on main, is
+  # released as the next patch version (the version job decides).
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 permissions:
-  contents: write
-  id-token: write      # Sigstore, for the attestations
-  attestations: write
+  contents: read
 
 jobs:
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'push' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_commit.author.name == 'dependabot[bot]')
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      auto: ${{ steps.version.outputs.auto }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+      - id: version
+        name: Decide the version
+        env:
+          MANIFESTS: go.mod go.sum
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+            echo "auto=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          last="$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || true)"
+          if [ -z "$last" ]; then
+            echo "No release yet: the first one is tagged by hand."
+            exit 0
+          fi
+          # shellcheck disable=SC2086
+          if git diff --quiet "$last" HEAD -- $MANIFESTS; then
+            echo "No dependency changed since $last: nothing to release."
+            exit 0
+          fi
+          base="${last#v}"
+          base="${base%%-*}"
+          IFS=. read -r major minor patch <<< "$base"
+          next="v$major.$minor.$((patch + 1))"
+          git tag "$next" HEAD
+          git push origin "$next"
+          echo "tag=$next" >> "$GITHUB_OUTPUT"
+          echo "auto=true" >> "$GITHUB_OUTPUT"
+
   release:
     name: Release
+    needs: version
+    if: needs.version.outputs.tag != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write      # Sigstore, for the attestations
+      attestations: write
+    env:
+      TAG: ${{ needs.version.outputs.tag }}
+      AUTO: ${{ needs.version.outputs.auto }}
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ needs.version.outputs.tag }}
           fetch-depth: 0
       - uses: actions/setup-go@v7
         with:
@@ -33,9 +96,18 @@ jobs:
           cache: true
       - name: Test
         run: go build ./... && go vet ./... && go test ./...
-      - name: Release notes from CHANGELOG.md
+      - name: Release notes
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          if [ "$AUTO" = true ]; then
+            prev="$(git describe --tags --abbrev=0 --match 'v[0-9]*' "$TAG^" 2>/dev/null || true)"
+            {
+              echo "Dependency updates, released automatically:"
+              echo
+              git log --format='- %s' "${prev:+$prev..}$TAG"
+            } > notes.md
+            exit 0
+          fi
+          version="${TAG#v}"
           awk -v v="$version" '
             /^## / { if (found) exit; if (index($0, "[" v "]")) { found = 1; next } }
             found { print }
@@ -45,7 +117,7 @@ jobs:
             exit 1
           fi
       - name: Source archive, as the module proxy serves it
-        run: git archive --format=zip --prefix="freebusy-go-${GITHUB_REF_NAME}/" -o "source-${GITHUB_REF_NAME}.zip" "$GITHUB_REF_NAME"
+        run: git archive --format=zip --prefix="freebusy-go-${TAG}/" -o "source-${TAG}.zip" "$TAG"
       - name: SBOM (SPDX)
         uses: anchore/sbom-action@v0
         with:
@@ -67,10 +139,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           prerelease=""
-          case "$GITHUB_REF_NAME" in *-*) prerelease="--prerelease" ;; esac
-          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file notes.md $prerelease \
-            "source-${GITHUB_REF_NAME}.zip" sbom.spdx.json
+          case "$TAG" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "$TAG" --verify-tag --title "$TAG" --notes-file notes.md $prerelease \
+            "source-${TAG}.zip" sbom.spdx.json
       - name: Publish to the Go module proxy and pkg.go.dev
         run: |
-          curl -fsS "https://proxy.golang.org/github.com/shokki-engineering/freebusy-go/@v/${GITHUB_REF_NAME}.info"
-          curl -fsS -X POST "https://pkg.go.dev/fetch/github.com/shokki-engineering/freebusy-go@${GITHUB_REF_NAME}" || true
+          curl -fsS "https://proxy.golang.org/github.com/shokki-engineering/freebusy-go/@v/${TAG}.info"
+          curl -fsS -X POST "https://pkg.go.dev/fetch/github.com/shokki-engineering/freebusy-go@${TAG}" || true

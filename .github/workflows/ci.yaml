@@ -76,3 +76,47 @@ jobs:
       # artifact: uploading it to code scanning needs GitHub Advanced
       # Security, which a private repository may not have.
       upload-sarif: false
+
+  sandbox:
+    name: Examples against the API server (sandbox)
+    runs-on: ubuntu-latest
+    # The server is the release sandbox/compose.yaml pins; Dependabot opens
+    # a pull request for each new one, and this job tests it.
+    env:
+      FREEBUSY_CALDAV_URL: "http://127.0.0.1:8080/dav"
+      FREEBUSY_ENDPOINT: "127.0.0.1:50051"
+      FREEBUSY_INSECURE: "true"
+      FREEBUSY_REST_ENDPOINT: "http://127.0.0.1:8080"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Start the sandbox
+        run: docker compose -f sandbox/compose.yaml up -d
+      - name: Wait until it is ready
+        run: |
+          for _ in $(seq 90); do
+            curl -fsS "http://127.0.0.1:8080/health" >/dev/null && exit 0
+            sleep 2
+          done
+          echo "::error::the sandbox never answered http://127.0.0.1:8080/health"
+          exit 1
+      - name: Run the examples
+        run: |
+          for d in examples/*/; do
+            echo "== $d"
+            go run "./$d"
+          done
+      - name: Sandbox logs
+        if: failure()
+        run: docker compose -f sandbox/compose.yaml logs --no-color
+      - name: Tested against
+        if: always()
+        run: |
+          {
+            echo "### Sandbox"
+            docker compose -f sandbox/compose.yaml config --images | sed 's/^/- /'
+          } >> "$GITHUB_STEP_SUMMARY"
+

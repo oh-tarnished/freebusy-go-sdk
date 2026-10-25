@@ -1,10 +1,30 @@
 version: 2
+# Daily, so a fixed vulnerability in a dependency arrives within a day.
+# Minor and patch updates come grouped in one pull request; CI's checks gate
+# it, dependabot-auto-merge.yaml merges it once they pass, and the release
+# workflow then releases the next patch version.
 updates:
   - package-ecosystem: gomod
     directory: /
     schedule:
-      interval: weekly
+      interval: daily
+    groups:
+      dependencies:
+        update-types: [minor, patch]
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+  # The API server the sandbox runs: each release is a pull request, which
+  # CI's sandbox job tests the examples against.
+  - package-ecosystem: docker-compose
+    directory: /sandbox
+    schedule:
+      interval: daily
+    groups:
+      sandbox:
+        patterns: ["*"]
+

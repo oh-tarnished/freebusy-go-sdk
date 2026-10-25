@@ -1,0 +1,48 @@
+# The freebusy server the SDK's examples run against in CI: a released image,
+# Postgres, and the migrations that release ships. Dependabot opens a pull
+# request for each new release (the image tags below), and CI's sandbox job
+# runs the examples against it before it merges.
+#
+# Host networking, so the server reaches the webhook receiver an example
+# starts on 127.0.0.1. Linux only (GitHub's runners); nothing here is for
+# production.
+
+name: freebusy-sandbox
+
+services:
+  freebusy:
+    image: ghcr.io/shokki-engineering/freebusy:1.0.0-rc.1
+    network_mode: host
+    environment:
+      FREEBUSY_DATABASE__POSTGRES__HOST: 127.0.0.1
+      FREEBUSY_DATABASE__POSTGRES__PASSWORD: sandbox
+      FREEBUSY_DATABASE__POSTGRES__SSLMODE: disable
+      # The examples write a calendar over CalDAV and receive webhooks on a
+      # plain-HTTP local endpoint.
+      FREEBUSY_CALDAV__ENABLED: "true"
+      FREEBUSY_WEBHOOKS__ALLOW_INSECURE_ENDPOINTS: "true"
+      FREEBUSY_WEBHOOKS__ALLOW_PRIVATE_NETWORKS: "true"
+      FREEBUSY_WEBHOOKS__INTERVAL_SECONDS: "2"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  migrate:
+    image: ghcr.io/shokki-engineering/freebusy-migrations:1.0.0-rc.1
+    network_mode: host
+    command: ["--url", "postgres://postgres:sandbox@127.0.0.1:5432/freebusydb?sslmode=disable"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:18.4
+    ports: ["127.0.0.1:5432:5432"]
+    environment:
+      POSTGRES_PASSWORD: sandbox
+      POSTGRES_DB: freebusydb
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 30

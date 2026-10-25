@@ -68,6 +68,7 @@ docs:
     desks, people.
   recipes:
     - title: Webhooks
+      languages: [go]
       body: |
         `freebusy.ParseWebhook(r, secrets...)` verifies a delivery's Standard
         Webhooks signature and decodes it; `Event.Reservation()` and
@@ -77,6 +78,16 @@ publish:
   regenerate:
     event: api-release
     schedule: "0 6 * * 1"
+  # The examples run in CI against the freebusy release this compose file
+  # pins; Dependabot moves the pin to each new release.
+  sandbox:
+    compose: sandbox/compose.yaml
+    ready: http://127.0.0.1:8080/health
+    env:
+      FREEBUSY_ENDPOINT: 127.0.0.1:50051
+      FREEBUSY_REST_ENDPOINT: http://127.0.0.1:8080
+      FREEBUSY_INSECURE: "true"
+      FREEBUSY_CALDAV_URL: http://127.0.0.1:8080/dav
 
 languages:
   go:
@@ -91,8 +102,11 @@ languages:
       version: 0.65.0
   typescript:
     package: "@shokki-engineering/freebusy"
+    custom_files: custom-typescript
+    examples: false
   python:
     package: shokki-freebusy
     module: freebusy
     repository: shokki-engineering/freebusy-python
     custom_files: custom-python
+    examples: false

@@ -1,0 +1,42 @@
+name: Dependabot auto-merge
+
+# Turns on GitHub's auto-merge for Dependabot's pull requests: GitHub merges
+# when every check that main's branch protection requires has passed, so
+# make CI's jobs required checks (Settings -> Branches). A failing check
+# leaves the pull request open. Major version updates are left for a person
+# to read. Only Dependabot's own pull requests, checked by the event's actor
+# and the pull request's author both.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Enable auto-merge
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'
+    steps:
+      - id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Merge once the required checks pass
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        env:
+          PR: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPS: ${{ steps.metadata.outputs.dependency-names }}
+          UPDATE: ${{ steps.metadata.outputs.update-type }}
+        run: |
+          echo "Auto-merging $DEPS ($UPDATE) once CI passes"
+          gh pr merge --auto --squash "$PR"

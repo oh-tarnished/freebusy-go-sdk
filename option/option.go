@@ -17,17 +17,17 @@ import (
 	"errors"
 	"time"
 
-	"github.com/shokki-engineering/freebusy-go/internal/requestconfig"
+	"github.com/shokki-engineering/freebusy-go/internal/request"
 	"google.golang.org/grpc"
 )
 
 // RequestOption is one setting of the client or of a call.
-type RequestOption func(*requestconfig.Config) error
+type RequestOption func(*request.Config) error
 
 // WithEndpoint connects to endpoint, host:port, instead of freebusy.shokki.engineering:443
 // (or $FREEBUSY_ENDPOINT).
 func WithEndpoint(endpoint string) RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		if endpoint == "" {
 			return errors.New("option.WithEndpoint: empty endpoint")
 		}
@@ -39,7 +39,7 @@ func WithEndpoint(endpoint string) RequestOption {
 // WithInsecure connects without TLS, for a server on a trusted network such
 // as a local one. $FREEBUSY_INSECURE=true does the same.
 func WithInsecure() RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		c.Insecure = true
 		return c.SetConnection("WithInsecure")
 	}
@@ -48,7 +48,7 @@ func WithInsecure() RequestOption {
 // WithTLSConfig connects with TLS configured by cfg, for instance to trust a
 // private certificate authority through its RootCAs.
 func WithTLSConfig(cfg *tls.Config) RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		c.Insecure, c.TLSConfig = false, cfg
 		return c.SetConnection("WithTLSConfig")
 	}
@@ -57,7 +57,7 @@ func WithTLSConfig(cfg *tls.Config) RequestOption {
 // WithGRPCConn makes calls over conn instead of dialing. The caller keeps
 // ownership: Client.Close does not close it.
 func WithGRPCConn(conn *grpc.ClientConn) RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		if conn == nil {
 			return errors.New("option.WithGRPCConn: nil connection")
 		}
@@ -68,7 +68,7 @@ func WithGRPCConn(conn *grpc.ClientConn) RequestOption {
 
 // WithGRPCDialOption adds a dial option, such as an interceptor.
 func WithGRPCDialOption(o grpc.DialOption) RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		c.DialOptions = append(c.DialOptions, o)
 		return c.SetConnection("WithGRPCDialOption")
 	}
@@ -77,7 +77,7 @@ func WithGRPCDialOption(o grpc.DialOption) RequestOption {
 // WithMetadata sends the gRPC metadata key: value with calls, replacing any
 // value key had.
 func WithMetadata(key, value string) RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		c.Metadata.Set(key, value)
 		return nil
 	}
@@ -85,7 +85,7 @@ func WithMetadata(key, value string) RequestOption {
 
 // WithTimeout bounds each call, retries included, to d. Zero is no bound.
 func WithTimeout(d time.Duration) RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		c.Timeout = d
 		return nil
 	}
@@ -94,7 +94,7 @@ func WithTimeout(d time.Duration) RequestOption {
 // WithMaxRetries retries a call that failed with UNAVAILABLE up to n times,
 // with exponential backoff. The default is 2; 0 disables retries.
 func WithMaxRetries(n int) RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		if n < 0 {
 			return errors.New("option.WithMaxRetries: negative count")
 		}
@@ -105,7 +105,7 @@ func WithMaxRetries(n int) RequestOption {
 
 // WithGRPCCallOption adds a gRPC call option to calls.
 func WithGRPCCallOption(o grpc.CallOption) RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		c.CallOptions = append(c.CallOptions, o)
 		return nil
 	}
@@ -125,14 +125,14 @@ func WithGRPCCallOption(o grpc.CallOption) RequestOption {
 // A connection option among them gives the service a connection of its own;
 // otherwise it shares the client's.
 func WithService(key string, opts ...RequestOption) RequestOption {
-	return func(c *requestconfig.Config) error {
+	return func(c *request.Config) error {
 		switch key {
 		case "availability", "holds", "reservations", "webhooks", "organizations", "sites", "resources", "calendars", "events", "availabilities":
 		default:
 			return errors.New("option.WithService: no service " + key)
 		}
 		if c.Services == nil {
-			c.Services = map[string][]func(*requestconfig.Config) error{}
+			c.Services = map[string][]func(*request.Config) error{}
 		}
 		for _, o := range opts {
 			c.Services[key] = append(c.Services[key], o)

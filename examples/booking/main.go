@@ -63,7 +63,11 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer client.Close()
+	defer func() {
+		if err := client.Close(); err != nil {
+			log.Printf("close: %v", err)
+		}
+	}()
 
 	loc, err := time.LoadLocation(zone)
 	if err != nil {
@@ -344,7 +348,7 @@ func blockOut(ctx context.Context, client *freebusy.Client, calendar, summary st
 		if err != nil {
 			return fmt.Errorf("caldav: %w", err)
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusNoContent {
 			body, _ := io.ReadAll(resp.Body)
 			return fmt.Errorf("caldav: PUT %s: %s: %s", url, resp.Status, body)
