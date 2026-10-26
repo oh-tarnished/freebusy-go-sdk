@@ -1,0 +1,4 @@
+[[IgnoredVulns]]
+id = "GO-2026-5932"
+ignoreUntil = 2027-01-31
+reason = "golang.org/x/crypto v0.58.0 is the latest release with no fix available; indirect via google/s2a-go and govulncheck reports it as unreachable."

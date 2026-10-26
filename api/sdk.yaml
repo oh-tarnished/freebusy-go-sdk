@@ -93,7 +93,7 @@ languages:
   go:
     module: github.com/shokki-engineering/freebusy-go
     package: freebusy
-    go_version: "1.26"
+    go_version: "1.26.10"
     custom_files: custom
     # One hand-written example (examples/booking) instead of a skeleton per
     # service.
