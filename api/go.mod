@@ -2,4 +2,4 @@
 // it exists so the root module's ./... leaves api/ out.
 module github.com/shokki-engineering/freebusy-go/api
 
-go 1.26
+go 1.26.10

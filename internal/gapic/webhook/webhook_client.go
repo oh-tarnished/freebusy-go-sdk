@@ -140,7 +140,7 @@ func (c *Client) ListWebhooks(ctx context.Context, req *webhookpb.ListWebhooksRe
 	return c.internalClient.ListWebhooks(ctx, req, opts...)
 }
 
-// UpdateWebhook updates a webhook: its endpoint, event types or site.
+// UpdateWebhook updates a webhook: its endpoint or event types.
 func (c *Client) UpdateWebhook(ctx context.Context, req *webhookpb.UpdateWebhookRequest, opts ...gax.CallOption) (*webhookpb.Webhook, error) {
 	return c.internalClient.UpdateWebhook(ctx, req, opts...)
 }

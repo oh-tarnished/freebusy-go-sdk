@@ -8,32 +8,31 @@ package allocationpb
 import "github.com/the-protobuf-project/resourcename"
 
 // HoldNamePattern is the pattern of a Hold's resource name.
-const HoldNamePattern = "organizationalUnits/{organizational_unit}/holds/{hold}"
+const HoldNamePattern = "holds/{hold}"
 
 // NewHoldName is the resource name of the Hold with these ids, by
 // HoldNamePattern. An id may not contain a slash.
-func NewHoldName(organizationalUnit, hold string) (string, error) {
-	return resourcename.MarshalResource(holdName{OrganizationalUnit: organizationalUnit, Hold: hold})
+func NewHoldName(hold string) (string, error) {
+	return resourcename.MarshalResource(holdName{Hold: hold})
 }
 
 // ParseHoldName returns the ids in a Hold's resource name, by
 // HoldNamePattern.
-func ParseHoldName(name string) (organizationalUnit, hold string, err error) {
+func ParseHoldName(name string) (hold string, err error) {
 	var n holdName
 	if err := resourcename.UnmarshalResource(name, &n); err != nil {
-		return "", "", err
+		return "", err
 	}
-	return n.OrganizationalUnit, n.Hold, nil
+	return n.Hold, nil
 }
 
 // ParseName returns the ids in the Hold's name, by HoldNamePattern.
-func (x *Hold) ParseName() (organizationalUnit, hold string, err error) {
+func (x *Hold) ParseName() (hold string, err error) {
 	return ParseHoldName(x.GetName())
 }
 
 // holdName carries HoldNamePattern for resourcename.
 type holdName struct {
-	_                  struct{} `resource:"organizationalUnits/{organizational_unit}/holds/{hold}"`
-	OrganizationalUnit string   `resource:"organizational_unit"`
-	Hold               string   `resource:"hold"`
+	_    struct{} `resource:"holds/{hold}"`
+	Hold string   `resource:"hold"`
 }

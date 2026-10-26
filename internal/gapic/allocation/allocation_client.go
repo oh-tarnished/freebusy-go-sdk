@@ -7,10 +7,8 @@ package allocation
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"math"
-	"net/url"
 
 	gax "github.com/googleapis/gax-go/v2"
 	allocationpb "github.com/shokki-engineering/freebusy-go/pb/allocationpb"
@@ -113,7 +111,7 @@ func (c *Client) Connection() *grpc.ClientConn {
 	return c.internalClient.Connection()
 }
 
-// ComputeAvailability computes availability across a site’s resources, bucketed by slot or day.
+// ComputeAvailability computes availability across resources, bucketed by slot or day.
 func (c *Client) ComputeAvailability(ctx context.Context, req *allocationpb.ComputeAvailabilityRequest, opts ...gax.CallOption) (*allocationpb.ComputeAvailabilityResponse, error) {
 	return c.internalClient.ComputeAvailability(ctx, req, opts...)
 }
@@ -128,17 +126,17 @@ func (c *Client) CheckAvailability(ctx context.Context, req *allocationpb.CheckA
 
 // BatchComputeAvailability runs several availability computations in one round trip.
 //
-// Each entry is independent and may name a different site, window or
-// granularity. Capped at 50 entries, because each one fans out across every
+// Each entry is independent and may name different resources, a different
+// window or granularity. Capped at 50 entries, because each one fans out across every
 // candidate resource’s calendar.
 func (c *Client) BatchComputeAvailability(ctx context.Context, req *allocationpb.BatchComputeAvailabilityRequest, opts ...gax.CallOption) (*allocationpb.BatchComputeAvailabilityResponse, error) {
 	return c.internalClient.BatchComputeAvailability(ctx, req, opts...)
 }
 
-// SearchAvailability sweeps an operator for resources free across a window.
+// SearchAvailability searches every resource for those free across a window.
 //
-// The search entry point, where ComputeAvailability answers for a site the
-// caller has already chosen. Paginated, since a large operator may match
+// The search entry point, where ComputeAvailability counts over resources
+// the caller has already chosen. Paginated, since a search may match
 // thousands of resources.
 func (c *Client) SearchAvailability(ctx context.Context, req *allocationpb.SearchAvailabilityRequest, opts ...gax.CallOption) *AvailabilityMatchIterator {
 	return c.internalClient.SearchAvailability(ctx, req, opts...)
@@ -233,10 +231,7 @@ func (c *gRPCClient) Close() error {
 }
 
 func (c *gRPCClient) ComputeAvailability(ctx context.Context, req *allocationpb.ComputeAvailabilityRequest, opts ...gax.CallOption) (*allocationpb.ComputeAvailabilityResponse, error) {
-	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent()))}
-
-	hds = append(c.xGoogHeaders, hds...)
-	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ComputeAvailability[0:len((*c.CallOptions).ComputeAvailability):len((*c.CallOptions).ComputeAvailability)], opts...)
 	var resp *allocationpb.ComputeAvailabilityResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -251,10 +246,7 @@ func (c *gRPCClient) ComputeAvailability(ctx context.Context, req *allocationpb.
 }
 
 func (c *gRPCClient) CheckAvailability(ctx context.Context, req *allocationpb.CheckAvailabilityRequest, opts ...gax.CallOption) (*allocationpb.CheckAvailabilityResponse, error) {
-	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent()))}
-
-	hds = append(c.xGoogHeaders, hds...)
-	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).CheckAvailability[0:len((*c.CallOptions).CheckAvailability):len((*c.CallOptions).CheckAvailability)], opts...)
 	var resp *allocationpb.CheckAvailabilityResponse
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -284,10 +276,7 @@ func (c *gRPCClient) BatchComputeAvailability(ctx context.Context, req *allocati
 }
 
 func (c *gRPCClient) SearchAvailability(ctx context.Context, req *allocationpb.SearchAvailabilityRequest, opts ...gax.CallOption) *AvailabilityMatchIterator {
-	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent()))}
-
-	hds = append(c.xGoogHeaders, hds...)
-	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).SearchAvailability[0:len((*c.CallOptions).SearchAvailability):len((*c.CallOptions).SearchAvailability)], opts...)
 	it := &AvailabilityMatchIterator{}
 	req = proto.CloneOf(req)

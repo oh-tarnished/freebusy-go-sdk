@@ -78,7 +78,7 @@ func run(ctx context.Context) error {
 	at := func(hour int) time.Time { return day.Add(time.Duration(hour) * time.Hour) }
 	run := fmt.Sprintf("%x", time.Now().UnixNano()&0xffffffff)
 
-	org, site, err := createSite(ctx, client, run)
+	_, site, err := createSite(ctx, client, run)
 	if err != nil {
 		return err
 	}
@@ -100,9 +100,8 @@ func run(ctx context.Context) error {
 	hook, err := client.Webhooks.New(ctx, &webhookpb.CreateWebhookRequest{
 		WebhookId: "booking-" + run,
 		Webhook: &webhookpb.Webhook{
-			Uri:                hooks.url,
-			OrganizationalUnit: site,
-			EventTypes:         []string{freebusy.EventReservationConfirmed, freebusy.EventReservationCancelled},
+			Uri:        hooks.url,
+			EventTypes: []string{freebusy.EventReservationConfirmed, freebusy.EventReservationCancelled},
 		},
 	})
 	if err != nil {
@@ -120,7 +119,7 @@ func run(ctx context.Context) error {
 		return err
 	}
 	check, err := client.Availability.CheckAvailability(ctx, &allocationpb.CheckAvailabilityRequest{
-		Parent: site, Resources: []string{rooms[0].name}, Window: freebusy.Window(at(12), at(13)), Quantity: 1,
+		Resources: []string{rooms[0].name}, Window: freebusy.Window(at(12), at(13)), Quantity: 1,
 	})
 	if err != nil {
 		return fmt.Errorf("check availability: %w", err)
@@ -142,7 +141,7 @@ func run(ctx context.Context) error {
 	// Three customers want 10:00 and there are two rooms.
 	var booked []*reservationpb.Reservation
 	for _, customer := range []string{"dana", "lee", "sam"} {
-		res, err := book(ctx, client, org, site, "users/"+customer+"-"+run, at(10), at(18), time.Hour)
+		res, err := book(ctx, client, "users/"+customer+"-"+run, at(10), at(18), time.Hour)
 		if err != nil {
 			return err
 		}
@@ -161,7 +160,7 @@ func run(ctx context.Context) error {
 	}
 	fmt.Printf("webhook received %d confirmations\n", len(booked))
 
-	moved, err := reschedule(ctx, client, site, booked[0], at(15), at(16))
+	moved, err := reschedule(ctx, client, booked[0], at(15), at(16))
 	if err != nil {
 		return err
 	}
@@ -183,12 +182,12 @@ func run(ctx context.Context) error {
 
 // book reserves one meeting room for customer for length, at the first hour
 // from start (and before end) that any room is free.
-func book(ctx context.Context, client *freebusy.Client, org, site, customer string, start, end time.Time, length time.Duration) (*reservationpb.Reservation, error) {
+func book(ctx context.Context, client *freebusy.Client, customer string, start, end time.Time, length time.Duration) (*reservationpb.Reservation, error) {
 	for from := start; !from.Add(length).After(end); from = from.Add(time.Hour) {
 		window := freebusy.Window(from, from.Add(length))
 		var free []string
 		for m, err := range client.Availability.SearchAvailabilityAutoPaging(ctx, &allocationpb.SearchAvailabilityRequest{
-			Parent: org, Window: window, ResourceTypes: []string{"meeting-room"}, Quantity: 1,
+			Window: window, ResourceTypes: []string{"meeting-room"},
 		}).All() {
 			if err != nil {
 				return nil, fmt.Errorf("search: %w", err)
@@ -199,7 +198,6 @@ func book(ctx context.Context, client *freebusy.Client, org, site, customer stri
 			continue
 		}
 		hold, err := client.Holds.New(ctx, &allocationpb.CreateHoldRequest{
-			Parent: site,
 			Hold: &allocationpb.Hold{
 				Window: window, Quantity: 1, CandidateResources: free,
 				// A retry after a lost answer gets this hold back instead of
@@ -214,7 +212,6 @@ func book(ctx context.Context, client *freebusy.Client, org, site, customer stri
 			return nil, fmt.Errorf("hold: %w", err)
 		}
 		res, err := client.Reservations.New(ctx, &reservationpb.CreateReservationRequest{
-			Parent:      site,
 			Reservation: &reservationpb.Reservation{Hold: hold.GetName(), Customer: customer},
 		})
 		switch {
@@ -230,10 +227,9 @@ func book(ctx context.Context, client *freebusy.Client, org, site, customer stri
 
 // reschedule moves res to [start, end) in the same room. The original keeps
 // its room until the move is confirmed.
-func reschedule(ctx context.Context, client *freebusy.Client, site string, res *reservationpb.Reservation, start, end time.Time) (*reservationpb.Reservation, error) {
+func reschedule(ctx context.Context, client *freebusy.Client, res *reservationpb.Reservation, start, end time.Time) (*reservationpb.Reservation, error) {
 	for attempt := 0; attempt < 2; attempt++ {
 		hold, err := client.Holds.New(ctx, &allocationpb.CreateHoldRequest{
-			Parent: site,
 			Hold: &allocationpb.Hold{
 				Window: freebusy.Window(start, end), Quantity: 1,
 				CandidateResources: res.GetResources(), Replaces: res.GetHold(),

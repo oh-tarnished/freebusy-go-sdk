@@ -8,32 +8,31 @@ package reservationpb
 import "github.com/the-protobuf-project/resourcename"
 
 // ReservationNamePattern is the pattern of a Reservation's resource name.
-const ReservationNamePattern = "organizationalUnits/{organizational_unit}/reservations/{reservation}"
+const ReservationNamePattern = "reservations/{reservation}"
 
 // NewReservationName is the resource name of the Reservation with these ids, by
 // ReservationNamePattern. An id may not contain a slash.
-func NewReservationName(organizationalUnit, reservation string) (string, error) {
-	return resourcename.MarshalResource(reservationName{OrganizationalUnit: organizationalUnit, Reservation: reservation})
+func NewReservationName(reservation string) (string, error) {
+	return resourcename.MarshalResource(reservationName{Reservation: reservation})
 }
 
 // ParseReservationName returns the ids in a Reservation's resource name, by
 // ReservationNamePattern.
-func ParseReservationName(name string) (organizationalUnit, reservation string, err error) {
+func ParseReservationName(name string) (reservation string, err error) {
 	var n reservationName
 	if err := resourcename.UnmarshalResource(name, &n); err != nil {
-		return "", "", err
+		return "", err
 	}
-	return n.OrganizationalUnit, n.Reservation, nil
+	return n.Reservation, nil
 }
 
 // ParseName returns the ids in the Reservation's name, by ReservationNamePattern.
-func (x *Reservation) ParseName() (organizationalUnit, reservation string, err error) {
+func (x *Reservation) ParseName() (reservation string, err error) {
 	return ParseReservationName(x.GetName())
 }
 
 // reservationName carries ReservationNamePattern for resourcename.
 type reservationName struct {
-	_                  struct{} `resource:"organizationalUnits/{organizational_unit}/reservations/{reservation}"`
-	OrganizationalUnit string   `resource:"organizational_unit"`
-	Reservation        string   `resource:"reservation"`
+	_           struct{} `resource:"reservations/{reservation}"`
+	Reservation string   `resource:"reservation"`
 }

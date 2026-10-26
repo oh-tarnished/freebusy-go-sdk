@@ -16,7 +16,7 @@ next regeneration.
 
 ```sh
 go install github.com/googleapis/gapic-generator-go/cmd/protoc-gen-go_gapic@v0.65.0
-go install github.com/the-protobuf-project/sdk/plugin/cmd/protoc-gen-sdk@latest
+go install github.com/the-protobuf-project/sdk/plugin/cmd/protoc-gen-sdk@v0.1.1
 bash scripts/generate.sh
 ```
 

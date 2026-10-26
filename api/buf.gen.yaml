@@ -3,7 +3,7 @@
 # reference images sdk.yaml lists.
 version: v2
 inputs:
-  - module: buf.build/shokki-engineering/freebusy:42f6e4ec44de415c8589688bb10f9dfa
+  - module: buf.build/shokki-engineering/freebusy:2d0433d66bbe4d05a866413bc120b292
 plugins:
   - local: protoc-gen-sdk
     out: ..

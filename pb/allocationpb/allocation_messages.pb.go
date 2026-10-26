@@ -32,11 +32,8 @@ const (
 // Request message for AllocationService.ComputeAvailability.
 type ComputeAvailabilityRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The site whose resources to compute over.
-	// Format: organizationalUnits/{organizational_unit}
-	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
 	// Restrict the computation to these resources. Empty means every resource
-	// the site holds.
+	// `filter` matches.
 	// Format: resources/{resource}
 	Resources []string `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
 	// The window to compute over.
@@ -46,17 +43,17 @@ type ComputeAvailabilityRequest struct {
 	// Slot length for SLOT granularity. Ignored for DAY.
 	SlotDuration *durationpb.Duration `protobuf:"bytes,5,opt,name=slot_duration,json=slotDuration,proto3" json:"slot_duration,omitempty"`
 	// IANA time zone the day boundaries are drawn in, e.g. "Asia/Kolkata".
-	// Defaults to the site's zone. Required in effect for DAY granularity, since
-	// "a night" has no meaning without one.
+	// Defaults to the zone of the first resource's calendar. Required in effect
+	// for DAY granularity, since "a night" has no meaning without one.
 	TimeZone string `protobuf:"bytes,6,opt,name=time_zone,json=timeZone,proto3" json:"time_zone,omitempty"`
-	// Populate AvailabilityBucket.free_resources. Off by default: a large site
+	// Populate AvailabilityBucket.free_resources. Off by default: a large pool
 	// would otherwise repeat every resource name in every bucket.
 	IncludeFreeResources bool `protobuf:"varint,7,opt,name=include_free_resources,json=includeFreeResources,proto3" json:"include_free_resources,omitempty"`
 	// An AIP-160 filter over each resource's search record (ResourceDay): its
 	// `resource_types`, its STRUCTURED-DATA under `attributes` (any path, e.g.
-	// `attributes.view = "river" AND attributes.max_occupancy >= 3`), its
-	// `display_name` (a bare word matches it) and `organizational_unit`. Terms
-	// are ANDed unless joined with OR. Empty matches every resource.
+	// `attributes.view = "river" AND attributes.max_occupancy >= 3`) and its
+	// `display_name` (a bare word matches it). Terms are ANDed unless joined
+	// with OR. Empty matches every resource.
 	// Only matching resources are computed over or counted.
 	Filter        string `protobuf:"bytes,8,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -91,13 +88,6 @@ func (x *ComputeAvailabilityRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ComputeAvailabilityRequest.ProtoReflect.Descriptor instead.
 func (*ComputeAvailabilityRequest) Descriptor() ([]byte, []int) {
 	return file_freebusy_allocation_v1_allocation_messages_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *ComputeAvailabilityRequest) GetParent() string {
-	if x != nil {
-		return x.Parent
-	}
-	return ""
 }
 
 func (x *ComputeAvailabilityRequest) GetResources() []string {
@@ -207,11 +197,8 @@ func (x *ComputeAvailabilityResponse) GetTotalCount() int32 {
 // Request message for AllocationService.CheckAvailability.
 type CheckAvailabilityRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The site whose resources to check.
-	// Format: organizationalUnits/{organizational_unit}
-	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
-	// Restrict the check to these resources. Empty means every resource the site
-	// holds.
+	// Restrict the check to these resources. Empty means every resource
+	// `filter` matches.
 	// Format: resources/{resource}
 	Resources []string `protobuf:"bytes,2,rep,name=resources,proto3" json:"resources,omitempty"`
 	// The exact window to check.
@@ -220,9 +207,9 @@ type CheckAvailabilityRequest struct {
 	Quantity int32 `protobuf:"varint,4,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	// An AIP-160 filter over each resource's search record (ResourceDay): its
 	// `resource_types`, its STRUCTURED-DATA under `attributes` (any path, e.g.
-	// `attributes.view = "river" AND attributes.max_occupancy >= 3`), its
-	// `display_name` (a bare word matches it) and `organizational_unit`. Terms
-	// are ANDed unless joined with OR. Empty matches every resource.
+	// `attributes.view = "river" AND attributes.max_occupancy >= 3`) and its
+	// `display_name` (a bare word matches it). Terms are ANDed unless joined
+	// with OR. Empty matches every resource.
 	// Only matching resources are checked.
 	Filter        string `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -257,13 +244,6 @@ func (x *CheckAvailabilityRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CheckAvailabilityRequest.ProtoReflect.Descriptor instead.
 func (*CheckAvailabilityRequest) Descriptor() ([]byte, []int) {
 	return file_freebusy_allocation_v1_allocation_messages_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *CheckAvailabilityRequest) GetParent() string {
-	if x != nil {
-		return x.Parent
-	}
-	return ""
 }
 
 func (x *CheckAvailabilityRequest) GetResources() []string {
@@ -370,8 +350,8 @@ func (x *CheckAvailabilityResponse) GetCandidateResources() []string {
 }
 
 // Request message for AllocationService.BatchComputeAvailability. Each entry is
-// a full ComputeAvailabilityRequest, so sites, windows and granularities may
-// differ within one batch.
+// a full ComputeAvailabilityRequest, so resources, windows and granularities
+// may differ within one batch.
 type BatchComputeAvailabilityRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The computations to run. Capped at 50 to bound the calendar reads a single
@@ -464,26 +444,17 @@ func (x *BatchComputeAvailabilityResponse) GetResponses() []*ComputeAvailability
 	return nil
 }
 
-// Request message for AllocationService.SearchAvailability. Sweeps a whole
-// operator for resources free across a window, where ComputeAvailability
-// answers for one site already chosen.
+// Request message for AllocationService.SearchAvailability. Searches every
+// resource for those free across a window, where ComputeAvailability counts
+// over resources already chosen.
 type SearchAvailabilityRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The operator to search within.
-	// Format: organizations/{organization}
-	Parent string `protobuf:"bytes,1,opt,name=parent,proto3" json:"parent,omitempty"`
 	// The window that must be free.
 	Window *interval.Interval `protobuf:"bytes,2,opt,name=window,proto3" json:"window,omitempty"`
-	// Restrict to sites, e.g. one car park or one venue. Empty searches all.
-	// Format: organizationalUnits/{organizational_unit}
-	OrganizationalUnits []string `protobuf:"bytes,3,rep,name=organizational_units,json=organizationalUnits,proto3" json:"organizational_units,omitempty"`
 	// Restrict to RESOURCE-TYPE values, RFC 9073 section 6.3, e.g. "room" or
 	// "parking-bay": a resource matches when it carries any of them. Empty
 	// matches every type.
 	ResourceTypes []string `protobuf:"bytes,4,rep,name=resource_types,json=resourceTypes,proto3" json:"resource_types,omitempty"`
-	// How many resources must be free together at one site for it to match.
-	// Defaults to 1.
-	Quantity int32 `protobuf:"varint,5,opt,name=quantity,proto3" json:"quantity,omitempty"`
 	// Maximum matches to return. Defaults to 50, capped at 1000.
 	PageSize int32 `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// Page token from a previous SearchAvailabilityResponse.next_page_token.
@@ -491,21 +462,20 @@ type SearchAvailabilityRequest struct {
 	PageToken string `protobuf:"bytes,7,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	// An AIP-160 filter over each resource's search record (ResourceDay): its
 	// `resource_types`, its STRUCTURED-DATA under `attributes` (any path, e.g.
-	// `attributes.view = "river" AND attributes.max_occupancy >= 3`), its
-	// `display_name` (a bare word matches it) and `organizational_unit`. Terms
-	// are ANDed unless joined with OR. Empty matches every resource.
+	// `attributes.view = "river" AND attributes.max_occupancy >= 3`) and its
+	// `display_name` (a bare word matches it). Terms are ANDed unless joined
+	// with OR. Empty matches every resource.
 	Filter string `protobuf:"bytes,8,opt,name=filter,proto3" json:"filter,omitempty"`
 	// AIP-132 order of the matches: a comma-separated list of `resource`,
-	// `organizational_unit`, `display_name`, `free_fraction` (the share of
-	// the window's first UTC day that is free) and `attributes.max_occupancy`
+	// `display_name`, `free_fraction` (the share of the window's first UTC day
+	// that is free) and `attributes.max_occupancy`
 	// (the booking profile's, as a number), each optionally followed by
 	// ` desc`, e.g. `free_fraction desc, display_name`. Defaults to
-	// `organizational_unit, resource`. When quantity is above 1, matches are
-	// grouped by site first, and the order applies within a site.
+	// `resource`.
 	OrderBy string `protobuf:"bytes,9,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
 	// Fields to count matching resources by, returned in
 	// SearchAvailabilityResponse.facets: `resource_types`,
-	// `organizational_unit` or an `attributes.<path>`, e.g.
+	// `display_name` or an `attributes.<path>`, e.g.
 	// ["resource_types", "attributes.view"]. At most 10.
 	Facets        []string `protobuf:"bytes,10,rep,name=facets,proto3" json:"facets,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -542,23 +512,9 @@ func (*SearchAvailabilityRequest) Descriptor() ([]byte, []int) {
 	return file_freebusy_allocation_v1_allocation_messages_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *SearchAvailabilityRequest) GetParent() string {
-	if x != nil {
-		return x.Parent
-	}
-	return ""
-}
-
 func (x *SearchAvailabilityRequest) GetWindow() *interval.Interval {
 	if x != nil {
 		return x.Window
-	}
-	return nil
-}
-
-func (x *SearchAvailabilityRequest) GetOrganizationalUnits() []string {
-	if x != nil {
-		return x.OrganizationalUnits
 	}
 	return nil
 }
@@ -568,13 +524,6 @@ func (x *SearchAvailabilityRequest) GetResourceTypes() []string {
 		return x.ResourceTypes
 	}
 	return nil
-}
-
-func (x *SearchAvailabilityRequest) GetQuantity() int32 {
-	if x != nil {
-		return x.Quantity
-	}
-	return 0
 }
 
 func (x *SearchAvailabilityRequest) GetPageSize() int32 {
@@ -684,9 +633,8 @@ var File_freebusy_allocation_v1_allocation_messages_proto protoreflect.FileDescr
 
 const file_freebusy_allocation_v1_allocation_messages_proto_rawDesc = "" +
 	"\n" +
-	"0freebusy/allocation/v1/allocation_messages.proto\x12\x16freebusy.allocation.v1\x1a'freebusy/allocation/v1/allocation.proto\x1a\"freebusy/allocation/v1/enums.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1agoogle/type/interval.proto\"\xfd\x03\n" +
-	"\x1aComputeAvailabilityRequest\x12=\n" +
-	"\x06parent\x18\x01 \x01(\tB%\xe0A\x02\xbaH\x1fr\x1d2\x1b^organizationalUnits/[^/]+$R\x06parent\x12G\n" +
+	"0freebusy/allocation/v1/allocation_messages.proto\x12\x16freebusy.allocation.v1\x1a'freebusy/allocation/v1/allocation.proto\x1a\"freebusy/allocation/v1/enums.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1agoogle/type/interval.proto\"\xcc\x03\n" +
+	"\x1aComputeAvailabilityRequest\x12G\n" +
 	"\tresources\x18\x02 \x03(\tB)\xe0A\x01\xfaA#\n" +
 	"!the-protobuf-project.org/ResourceR\tresources\x128\n" +
 	"\x06window\x18\x03 \x01(\v2\x15.google.type.IntervalB\t\xe0A\x02\xbaH\x03\xc8\x01\x01R\x06window\x12^\n" +
@@ -694,19 +642,18 @@ const file_freebusy_allocation_v1_allocation_messages_proto_rawDesc = "" +
 	"\rslot_duration\x18\x05 \x01(\v2\x19.google.protobuf.DurationB\x03\xe0A\x01R\fslotDuration\x12 \n" +
 	"\ttime_zone\x18\x06 \x01(\tB\x03\xe0A\x01R\btimeZone\x129\n" +
 	"\x16include_free_resources\x18\a \x01(\bB\x03\xe0A\x01R\x14includeFreeResources\x12\x1b\n" +
-	"\x06filter\x18\b \x01(\tB\x03\xe0A\x01R\x06filter\"\x84\x01\n" +
+	"\x06filter\x18\b \x01(\tB\x03\xe0A\x01R\x06filterJ\x04\b\x01\x10\x02R\x06parent\"\x84\x01\n" +
 	"\x1bComputeAvailabilityResponse\x12D\n" +
 	"\abuckets\x18\x01 \x03(\v2*.freebusy.allocation.v1.AvailabilityBucketR\abuckets\x12\x1f\n" +
 	"\vtotal_count\x18\x02 \x01(\x05R\n" +
-	"totalCount\"\xa1\x02\n" +
-	"\x18CheckAvailabilityRequest\x12=\n" +
-	"\x06parent\x18\x01 \x01(\tB%\xe0A\x02\xbaH\x1fr\x1d2\x1b^organizationalUnits/[^/]+$R\x06parent\x12G\n" +
+	"totalCount\"\xf0\x01\n" +
+	"\x18CheckAvailabilityRequest\x12G\n" +
 	"\tresources\x18\x02 \x03(\tB)\xe0A\x01\xfaA#\n" +
 	"!the-protobuf-project.org/ResourceR\tresources\x128\n" +
 	"\x06window\x18\x03 \x01(\v2\x15.google.type.IntervalB\t\xe0A\x02\xbaH\x03\xc8\x01\x01R\x06window\x12&\n" +
 	"\bquantity\x18\x04 \x01(\x05B\n" +
 	"\xe0A\x01\xbaH\x04\x1a\x02(\x00R\bquantity\x12\x1b\n" +
-	"\x06filter\x18\x05 \x01(\tB\x03\xe0A\x01R\x06filter\"\xf3\x01\n" +
+	"\x06filter\x18\x05 \x01(\tB\x03\xe0A\x01R\x06filterJ\x04\b\x01\x10\x02R\x06parent\"\xf3\x01\n" +
 	"\x19CheckAvailabilityResponse\x12\x1a\n" +
 	"\bbookable\x18\x01 \x01(\bR\bbookable\x12\x1d\n" +
 	"\n" +
@@ -717,15 +664,10 @@ const file_freebusy_allocation_v1_allocation_messages_proto_rawDesc = "" +
 	"\x1fBatchComputeAvailabilityRequest\x12]\n" +
 	"\brequests\x18\x01 \x03(\v22.freebusy.allocation.v1.ComputeAvailabilityRequestB\r\xe0A\x02\xbaH\a\x92\x01\x04\b\x01\x102R\brequests\"u\n" +
 	" BatchComputeAvailabilityResponse\x12Q\n" +
-	"\tresponses\x18\x01 \x03(\v23.freebusy.allocation.v1.ComputeAvailabilityResponseR\tresponses\"\xfc\x03\n" +
-	"\x19SearchAvailabilityRequest\x127\n" +
-	"\x06parent\x18\x01 \x01(\tB\x1f\xe0A\x02\xbaH\x19r\x172\x15^organizations/[^/]+$R\x06parent\x128\n" +
-	"\x06window\x18\x02 \x01(\v2\x15.google.type.IntervalB\t\xe0A\x02\xbaH\x03\xc8\x01\x01R\x06window\x12f\n" +
-	"\x14organizational_units\x18\x03 \x03(\tB3\xe0A\x01\xfaA-\n" +
-	"+the-protobuf-project.org/OrganizationalUnitR\x13organizationalUnits\x12*\n" +
-	"\x0eresource_types\x18\x04 \x03(\tB\x03\xe0A\x01R\rresourceTypes\x12&\n" +
-	"\bquantity\x18\x05 \x01(\x05B\n" +
-	"\xe0A\x01\xbaH\x04\x1a\x02(\x00R\bquantity\x12*\n" +
+	"\tresponses\x18\x01 \x03(\v23.freebusy.allocation.v1.ComputeAvailabilityResponseR\tresponses\"\xed\x02\n" +
+	"\x19SearchAvailabilityRequest\x128\n" +
+	"\x06window\x18\x02 \x01(\v2\x15.google.type.IntervalB\t\xe0A\x02\xbaH\x03\xc8\x01\x01R\x06window\x12*\n" +
+	"\x0eresource_types\x18\x04 \x03(\tB\x03\xe0A\x01R\rresourceTypes\x12*\n" +
 	"\tpage_size\x18\x06 \x01(\x05B\r\xe0A\x01\xbaH\a\x1a\x05\x18\xe8\a(\x00R\bpageSize\x12\"\n" +
 	"\n" +
 	"page_token\x18\a \x01(\tB\x03\xe0A\x01R\tpageToken\x12\x1b\n" +
@@ -733,7 +675,7 @@ const file_freebusy_allocation_v1_allocation_messages_proto_rawDesc = "" +
 	"\border_by\x18\t \x01(\tB\x03\xe0A\x01R\aorderBy\x12#\n" +
 	"\x06facets\x18\n" +
 	" \x03(\tB\v\xe0A\x01\xbaH\x05\x92\x01\x02\x10\n" +
-	"R\x06facets\"\xc6\x01\n" +
+	"R\x06facetsJ\x04\b\x01\x10\x02J\x04\b\x03\x10\x04J\x04\b\x05\x10\x06R\x06parentR\x14organizational_unitsR\bquantity\"\xc6\x01\n" +
 	"\x1aSearchAvailabilityResponse\x12C\n" +
 	"\amatches\x18\x01 \x03(\v2).freebusy.allocation.v1.AvailabilityMatchR\amatches\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12;\n" +

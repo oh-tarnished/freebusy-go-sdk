@@ -245,7 +245,7 @@ type UpdateWebhookRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The webhook, its name identifying which. `etag`, when set, must match.
 	Webhook *Webhook `protobuf:"bytes,1,opt,name=webhook,proto3" json:"webhook,omitempty"`
-	// Fields to update: display_name, uri, event_types, organizational_unit.
+	// Fields to update: display_name, uri, event_types.
 	// Empty updates every one of them.
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields

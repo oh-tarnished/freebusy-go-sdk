@@ -131,7 +131,7 @@ func (c *Client) GetReservation(ctx context.Context, req *reservationpb.GetReser
 	return c.internalClient.GetReservation(ctx, req, opts...)
 }
 
-// ListReservations lists a site’s reservations.
+// ListReservations lists reservations.
 func (c *Client) ListReservations(ctx context.Context, req *reservationpb.ListReservationsRequest, opts ...gax.CallOption) *ReservationIterator {
 	return c.internalClient.ListReservations(ctx, req, opts...)
 }
@@ -257,10 +257,7 @@ func (c *gRPCClient) Close() error {
 }
 
 func (c *gRPCClient) CreateReservation(ctx context.Context, req *reservationpb.CreateReservationRequest, opts ...gax.CallOption) (*reservationpb.Reservation, error) {
-	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent()))}
-
-	hds = append(c.xGoogHeaders, hds...)
-	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).CreateReservation[0:len((*c.CallOptions).CreateReservation):len((*c.CallOptions).CreateReservation)], opts...)
 	var resp *reservationpb.Reservation
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -293,10 +290,7 @@ func (c *gRPCClient) GetReservation(ctx context.Context, req *reservationpb.GetR
 }
 
 func (c *gRPCClient) ListReservations(ctx context.Context, req *reservationpb.ListReservationsRequest, opts ...gax.CallOption) *ReservationIterator {
-	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent()))}
-
-	hds = append(c.xGoogHeaders, hds...)
-	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListReservations[0:len((*c.CallOptions).ListReservations):len((*c.CallOptions).ListReservations)], opts...)
 	it := &ReservationIterator{}
 	req = proto.CloneOf(req)

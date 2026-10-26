@@ -137,7 +137,7 @@ func (c *HoldClient) GetHold(ctx context.Context, req *allocationpb.GetHoldReque
 	return c.internalClient.GetHold(ctx, req, opts...)
 }
 
-// ListHolds lists the holds taken at a site.
+// ListHolds lists holds.
 func (c *HoldClient) ListHolds(ctx context.Context, req *allocationpb.ListHoldsRequest, opts ...gax.CallOption) *HoldIterator {
 	return c.internalClient.ListHolds(ctx, req, opts...)
 }
@@ -256,10 +256,7 @@ func (c *holdGRPCClient) Close() error {
 }
 
 func (c *holdGRPCClient) CreateHold(ctx context.Context, req *allocationpb.CreateHoldRequest, opts ...gax.CallOption) (*allocationpb.Hold, error) {
-	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent()))}
-
-	hds = append(c.xGoogHeaders, hds...)
-	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).CreateHold[0:len((*c.CallOptions).CreateHold):len((*c.CallOptions).CreateHold)], opts...)
 	var resp *allocationpb.Hold
 	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
@@ -292,10 +289,7 @@ func (c *holdGRPCClient) GetHold(ctx context.Context, req *allocationpb.GetHoldR
 }
 
 func (c *holdGRPCClient) ListHolds(ctx context.Context, req *allocationpb.ListHoldsRequest, opts ...gax.CallOption) *HoldIterator {
-	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "parent", url.QueryEscape(req.GetParent()))}
-
-	hds = append(c.xGoogHeaders, hds...)
-	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
+	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, c.xGoogHeaders...)
 	opts = append((*c.CallOptions).ListHolds[0:len((*c.CallOptions).ListHolds):len((*c.CallOptions).ListHolds)], opts...)
 	it := &HoldIterator{}
 	req = proto.CloneOf(req)

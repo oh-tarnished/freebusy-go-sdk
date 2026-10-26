@@ -100,10 +100,10 @@ type Reservation struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The reservation name. Its id is the caller's reservation_id, or else the
 	// id of the hold it was made from.
-	// Format: organizationalUnits/{organizational_unit}/reservations/{reservation}
+	// Format: reservations/{reservation}
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// The hold this reservation was made from, at the same site.
-	// Format: organizationalUnits/{organizational_unit}/holds/{hold}
+	// The hold this reservation was made from.
+	// Format: holds/{hold}
 	Hold string `protobuf:"bytes,2,opt,name=hold,proto3" json:"hold,omitempty"`
 	// The resources taken, copied from the hold.
 	// Format: resources/{resource}
@@ -137,10 +137,10 @@ type Reservation struct {
 	Etag string `protobuf:"bytes,14,opt,name=etag,proto3" json:"etag,omitempty"`
 	// The reservation this one replaced, set when it was made by
 	// RescheduleReservation.
-	// Format: organizationalUnits/{organizational_unit}/reservations/{reservation}
+	// Format: reservations/{reservation}
 	Replaces string `protobuf:"bytes,15,opt,name=replaces,proto3" json:"replaces,omitempty"`
 	// The reservation replacing this one, set when RescheduleReservation began.
-	// Format: organizationalUnits/{organizational_unit}/reservations/{reservation}
+	// Format: reservations/{reservation}
 	Replacement string `protobuf:"bytes,16,opt,name=replacement,proto3" json:"replacement,omitempty"`
 	// What the last write to this reservation changed. A webhook is sent
 	// freebusy.reservation.updated exactly when it is CHANGE_DETAILS, and the
@@ -303,11 +303,12 @@ var File_freebusy_reservation_v1_reservation_proto protoreflect.FileDescriptor
 
 const file_freebusy_reservation_v1_reservation_proto_rawDesc = "" +
 	"\n" +
-	")freebusy/reservation/v1/reservation.proto\x12\x17freebusy.reservation.v1\x1a#freebusy/reservation/v1/enums.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd4\v\n" +
-	"\vReservation\x12O\n" +
-	"\x04name\x18\x01 \x01(\tB;\xe0A\b\xbaH5\xd8\x01\x01r02.^organizationalUnits/[^/]+/reservations/[^/]+$R\x04name\x12n\n" +
-	"\x04hold\x18\x02 \x01(\tBZ\xe0A\x02\xe0A\x05\xfaA\x1d\n" +
-	"\x1bfreebusy.allocation.v1/Hold\xbaH+r)2'^organizationalUnits/[^/]+/holds/[^/]+$\xe2\xb5\x18\x02\x18\x01R\x04hold\x12G\n" +
+	")freebusy/reservation/v1/reservation.proto\x12\x17freebusy.reservation.v1\x1a#freebusy/reservation/v1/enums.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe0\n" +
+	"\n" +
+	"\vReservation\x125\n" +
+	"\x04name\x18\x01 \x01(\tB!\xe0A\b\xbaH\x1b\xd8\x01\x01r\x162\x14^reservations/[^/]+$R\x04name\x12T\n" +
+	"\x04hold\x18\x02 \x01(\tB@\xe0A\x02\xe0A\x05\xfaA\x1d\n" +
+	"\x1bfreebusy.allocation.v1/Hold\xbaH\x11r\x0f2\r^holds/[^/]+$\xe2\xb5\x18\x02\x18\x01R\x04hold\x12G\n" +
 	"\tresources\x18\x03 \x03(\tB)\xe0A\x03\xfaA#\n" +
 	"!the-protobuf-project.org/ResourceR\tresources\x12>\n" +
 	"\n" +
@@ -336,13 +337,13 @@ const file_freebusy_reservation_v1_reservation_proto_rawDesc = "" +
 	"\x06Change\x12\x16\n" +
 	"\x12CHANGE_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fCHANGE_STATE\x10\x01\x12\x12\n" +
-	"\x0eCHANGE_DETAILS\x10\x02:\x8c\x02\xeaA\x86\x01\n" +
-	"#freebusy.reservation.v1/Reservation\x12DorganizationalUnits/{organizational_unit}/reservations/{reservation}*\freservations2\vreservation\xca\xf3\x181\x18\x01*\b\n" +
+	"\x0eCHANGE_DETAILS\x10\x02:\xcc\x01\xeaA\\\n" +
+	"#freebusy.reservation.v1/Reservation\x12\x1areservations/{reservation}*\freservations2\vreservation\xca\xf3\x181\x18\x01*\b\n" +
 	"\x04hold\x10\x01*\x14\n" +
 	"\x05state\n" +
 	"\vupdate_time*\r\n" +
-	"\vupdate_time\x8a\xb2\x19\b:\x06\b\x01\x12\x02\b<\xd2\xf0\x19=\n" +
-	"\x14freebusy.reservation\x12\acreated\x12\adeleted\x1a\x13organizational_unitB\x8a\x01\n" +
+	"\vupdate_time\x8a\xb2\x19\b:\x06\b\x01\x12\x02\b<\xd2\xf0\x19(\n" +
+	"\x14freebusy.reservation\x12\acreated\x12\adeletedB\x8a\x01\n" +
 	"*engineering.shokki.freebusy.reservation.v1B\x10ReservationProtoP\x01ZHgithub.com/shokki-engineering/freebusy-go/pb/reservationpb;reservationpbb\x06proto3"
 
 var (
