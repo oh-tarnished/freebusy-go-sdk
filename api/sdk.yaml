@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/the-protobuf-project/sdk/main/schema/sdk.schema.json
 #
 # The freebusy SDKs: freebusy's own services (availability, holds,
-# reservations, webhooks) and the RFC services it serves (organizations,
-# sites, resources, calendars, events, availabilities), in one client.
+# reservations, webhooks) and the RFC services it serves (resources,
+# calendars, events, availabilities), in one client.
 version: 1
 name: freebusy
 title: freebusy
@@ -37,18 +37,11 @@ services:
   - proto: freebusy.allocation.v1.HoldService
   - proto: freebusy.reservation.v1.ReservationService
   - proto: freebusy.webhook.v1.WebhookService
-  - proto: protobuf.rfc4519.organization.v1.Organizations
-  - proto: protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits
-    name: Sites
-    nest: [Resources]
   - proto: protobuf.rfc9073.resource.v1.Resources
   - proto: protobuf.rfc5545.calendar.v1.Calendars
   - proto: protobuf.rfc5545.event.v1.Events
   - proto: protobuf.rfc7953.availability.v1.Availabilities
     type: AvailabilitiesService
-
-resources:
-  the-protobuf-project.org/OrganizationalUnit: {singular: site, plural: sites}
 
 methods:
   protobuf.rfc5545.calendar.v1.Calendars.QueryFreeBusy: {name: QueryFreeBusy}

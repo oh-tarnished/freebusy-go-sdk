@@ -99,18 +99,6 @@ type WebhookService = service.WebhookService
 // WebhookDeliveryService is client.Webhooks.Deliveries, the freebusy.webhook.v1/Delivery methods of freebusy.webhook.v1.WebhookService.
 type WebhookDeliveryService = service.WebhookDeliveryService
 
-// OrganizationService is client.Organizations, the methods of protobuf.rfc4519.organization.v1.Organizations.
-//
-// Organizations manages the RFC 4519 'organization' object class,
-// section 3.8 <https://www.rfc-editor.org/rfc/rfc4519.html#section-3.8>.
-type OrganizationService = service.OrganizationService
-
-// SiteService is client.Sites, the methods of protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits.
-//
-// OrganizationalUnits manages the RFC 4519 'organizationalUnit' object
-// class, section 3.11 <https://www.rfc-editor.org/rfc/rfc4519.html#section-3.11>.
-type SiteService = service.SiteService
-
 // ResourceService is client.Resources, the methods of protobuf.rfc9073.resource.v1.Resources.
 //
 // Resources manages the RFC 9073 VRESOURCE component as a catalogue,

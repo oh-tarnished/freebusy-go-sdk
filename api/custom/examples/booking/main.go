@@ -3,7 +3,7 @@
 
 // Command booking runs freebusy end to end from an empty server.
 //
-// It sets up a site with two meeting rooms open 08:00-18:00, blocks one room
+// It sets up two meeting rooms open 08:00-18:00, blocks one room
 // for maintenance from a calendar, and checks that the engine sees the block.
 // Then it books three customers into the same hour, so the third is moved to
 // the next free hour, and receives the bookings over a webhook. Finally it
@@ -35,8 +35,6 @@ import (
 	"github.com/shokki-engineering/freebusy-go/pb/availabilitypb"
 	"github.com/shokki-engineering/freebusy-go/pb/calendarpb"
 	"github.com/shokki-engineering/freebusy-go/pb/eventpb"
-	"github.com/shokki-engineering/freebusy-go/pb/organizationalunitpb"
-	"github.com/shokki-engineering/freebusy-go/pb/organizationpb"
 	"github.com/shokki-engineering/freebusy-go/pb/reservationpb"
 	"github.com/shokki-engineering/freebusy-go/pb/resourcepb"
 	"github.com/shokki-engineering/freebusy-go/pb/webhookpb"
@@ -78,19 +76,15 @@ func run(ctx context.Context) error {
 	at := func(hour int) time.Time { return day.Add(time.Duration(hour) * time.Hour) }
 	run := fmt.Sprintf("%x", time.Now().UnixNano()&0xffffffff)
 
-	_, site, err := createSite(ctx, client, run)
-	if err != nil {
-		return err
-	}
 	var rooms []room
 	for _, id := range []string{"oak", "elm"} {
-		r, err := createRoom(ctx, client, site, id+"-"+run, at(8))
+		r, err := createRoom(ctx, client, id+"-"+run, at(8))
 		if err != nil {
 			return err
 		}
 		rooms = append(rooms, r)
 	}
-	fmt.Printf("site %s with rooms %s and %s, open 08:00-18:00\n", site, rooms[0].name, rooms[1].name)
+	fmt.Printf("rooms %s and %s, open 08:00-18:00\n", rooms[0].name, rooms[1].name)
 
 	hooks, err := listen()
 	if err != nil {
@@ -252,27 +246,9 @@ func reschedule(ctx context.Context, client *freebusy.Client, res *reservationpb
 	return nil, fmt.Errorf("could not move %s", res.GetName())
 }
 
-func createSite(ctx context.Context, client *freebusy.Client, run string) (org, site string, err error) {
-	o, err := client.Organizations.New(ctx, &organizationpb.CreateOrganizationRequest{
-		OrganizationId: "acme-" + run,
-		Organization:   &organizationpb.Organization{DisplayNames: []string{"Acme"}},
-	})
-	if err != nil {
-		return "", "", fmt.Errorf("create organization: %w", err)
-	}
-	s, err := client.Sites.New(ctx, &organizationalunitpb.CreateOrganizationalUnitRequest{
-		OrganizationalUnitId: "hq-" + run,
-		OrganizationalUnit:   &organizationalunitpb.OrganizationalUnit{DisplayNames: []string{"Acme HQ"}, Organization: o.GetName()},
-	})
-	if err != nil {
-		return "", "", fmt.Errorf("create site: %w", err)
-	}
-	return o.GetName(), s.GetName(), nil
-}
-
 // createRoom creates a meeting room with its own calendar, open 08:00-18:00
 // every day from opening.
-func createRoom(ctx context.Context, client *freebusy.Client, site, id string, opening time.Time) (room, error) {
+func createRoom(ctx context.Context, client *freebusy.Client, id string, opening time.Time) (room, error) {
 	cal, err := client.Calendars.New(ctx, &calendarpb.CreateCalendarRequest{
 		CalendarId: id,
 		Calendar:   &calendarpb.Calendar{DisplayName: "Room " + id, TimeZone: &datetime.TimeZone{Id: zone}},
@@ -305,7 +281,7 @@ func createRoom(ctx context.Context, client *freebusy.Client, site, id string, o
 		ResourceId: id,
 		Resource: &resourcepb.Resource{
 			DisplayName: "Room " + id, ResourceTypes: []string{"meeting-room"},
-			OrganizationalUnit: site, Calendar: cal.GetName(),
+			Calendar: cal.GetName(),
 			StructuredData: []*resourcepb.StructuredData{{
 				Schema:     "https://freebusy.shokki.engineering/schema/booking-profile",
 				FormatType: "application/json",

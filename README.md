@@ -47,8 +47,6 @@ flowchart LR
     svc_Holds["client.Holds<br/>HoldService"]
     svc_Reservations["client.Reservations<br/>ReservationService"]
     svc_Webhooks["client.Webhooks<br/>WebhookService"]
-    svc_Organizations["client.Organizations<br/>OrganizationService"]
-    svc_Sites["client.Sites<br/>SiteService"]
     svc_Resources["client.Resources<br/>ResourceService"]
     svc_Calendars["client.Calendars<br/>CalendarService"]
     svc_Events["client.Events<br/>EventService"]
@@ -58,8 +56,6 @@ flowchart LR
     gapic_allocation["allocation"]
     gapic_reservation["reservation"]
     gapic_webhook["webhook"]
-    gapic_organization["organization"]
-    gapic_organizationalunit["organizationalunit"]
     gapic_resource["resource"]
     gapic_calendar["calendar"]
     gapic_event["event"]
@@ -69,8 +65,6 @@ flowchart LR
     pb_allocation["allocationpb"]
     pb_reservation["reservationpb"]
     pb_webhook["webhookpb"]
-    pb_organization["organizationpb"]
-    pb_organizationalunit["organizationalunitpb"]
     pb_resource["resourcepb"]
     pb_calendar["calendarpb"]
     pb_event["eventpb"]
@@ -84,10 +78,6 @@ flowchart LR
   svc_Reservations --> gapic_reservation
   client --> svc_Webhooks
   svc_Webhooks --> gapic_webhook
-  client --> svc_Organizations
-  svc_Organizations --> gapic_organization
-  client --> svc_Sites
-  svc_Sites --> gapic_organizationalunit
   client --> svc_Resources
   svc_Resources --> gapic_resource
   client --> svc_Calendars
@@ -99,8 +89,6 @@ flowchart LR
   gapic_allocation --> pb_allocation
   gapic_reservation --> pb_reservation
   gapic_webhook --> pb_webhook
-  gapic_organization --> pb_organization
-  gapic_organizationalunit --> pb_organizationalunit
   gapic_resource --> pb_resource
   gapic_calendar --> pb_calendar
   gapic_event --> pb_event
@@ -128,8 +116,6 @@ flowchart TD
   the_protobuf_project_org_Availability["Availability<br/><code>calendars/{calendar}/availabilities/{availability}</code><br/>client.Availabilities"]
   the_protobuf_project_org_Calendar["Calendar<br/><code>calendars/{calendar}</code><br/>client.Calendars"]
   the_protobuf_project_org_Event["Event<br/><code>calendars/{calendar}/events/{event}</code><br/>client.Events"]
-  the_protobuf_project_org_Organization["Organization<br/><code>organizations/{organization}</code><br/>client.Organizations"]
-  the_protobuf_project_org_OrganizationalUnit["Site<br/><code>organizationalUnits/{organizational_unit}</code><br/>client.Sites"]
   the_protobuf_project_org_Resource["Resource<br/><code>resources/{resource}</code><br/>client.Resources"]
   freebusy_webhook_v1_Webhook --> freebusy_webhook_v1_Delivery
   the_protobuf_project_org_Calendar --> the_protobuf_project_org_Availability
@@ -187,8 +173,6 @@ of the API is a field of the client:
 | `client.Holds` | `freebusy.allocation.v1.HoldService` | HoldService takes and releases expiring claims on resources. |
 | `client.Reservations` | `freebusy.reservation.v1.ReservationService` | ReservationService turns holds into confirmed bookings, updates and cancels them. |
 | `client.Webhooks` | `freebusy.webhook.v1.WebhookService` | WebhookService subscribes endpoints to changes in holds, reservations and inventory, and shows what was sent to each. |
-| `client.Organizations` | `protobuf.rfc4519.organization.v1.Organizations` | Organizations manages the RFC 4519 'organization' object class, section 3.8 <https://www.rfc-editor.org/rfc/rfc4519.html#section-3.8>. |
-| `client.Sites` | `protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits` | OrganizationalUnits manages the RFC 4519 'organizationalUnit' object class, section 3.11 <https://www.rfc-editor.org/rfc/rfc4519.html#section-3.11>. |
 | `client.Resources` | `protobuf.rfc9073.resource.v1.Resources` | Resources manages the RFC 9073 VRESOURCE component as a catalogue, section 7.3 <https://www.rfc-editor.org/rfc/rfc9073.html#section-7.3>. |
 | `client.Calendars` | `protobuf.rfc5545.calendar.v1.Calendars` | Calendars manages the collections that Events belong to, RFC 5545 section 3.4 <https://www.rfc-editor.org/rfc/rfc5545.html#section-3.4>. |
 | `client.Events` | `protobuf.rfc5545.event.v1.Events` | Events manages RFC 5545 events as resources. |
@@ -238,7 +222,7 @@ res, err := client.Availability.ComputeAvailability(ctx, params, option.WithTime
 traced := client.Availability.WithOptions(option.WithMetadata("x-request-source", "batch"))
 ```
 
-Service keys for `WithService`: `availability`, `holds`, `reservations`, `webhooks`, `organizations`, `sites`, `resources`, `calendars`, `events`, `availabilities`.
+Service keys for `WithService`: `availability`, `holds`, `reservations`, `webhooks`, `resources`, `calendars`, `events`, `availabilities`.
 
 ## Services
 
@@ -366,55 +350,6 @@ if err != nil {
 	return err
 }
 fmt.Println(delivery.String())
-```
-
-### Organizations
-
-Organizations manages the RFC 4519 'organization' object class, section 3.8 <https://www.rfc-editor.org/rfc/rfc4519.html#section-3.8>. `client.Organizations` is a `OrganizationService`; reference: [docs/organizations.md](docs/organizations.md).
-
-| Method | Calls |
-|---|---|
-| `Get` | `GetOrganization` |
-| `List`, `ListAutoPaging` | `ListOrganizations` |
-| `New` | `CreateOrganization` |
-| `Update` | `UpdateOrganization` |
-| `Delete` | `DeleteOrganization` |
-| `Undelete` | `UndeleteOrganization` |
-| `Modify` | `GetOrganization` + `UpdateOrganization` |
-
-```go
-organization, err := client.Organizations.Get(ctx, &organizationpb.GetOrganizationRequest{
-	Name: "organizations/my-organization",
-})
-if err != nil {
-	return err
-}
-fmt.Println(organization.String())
-```
-
-### Sites
-
-OrganizationalUnits manages the RFC 4519 'organizationalUnit' object class, section 3.11 <https://www.rfc-editor.org/rfc/rfc4519.html#section-3.11>. `client.Sites` is a `SiteService`; reference: [docs/sites.md](docs/sites.md).
-
-| Method | Calls |
-|---|---|
-| `Get` | `GetOrganizationalUnit` |
-| `List`, `ListAutoPaging` | `ListOrganizationalUnits` |
-| `New` | `CreateOrganizationalUnit` |
-| `Update` | `UpdateOrganizationalUnit` |
-| `Delete` | `DeleteOrganizationalUnit` |
-| `Undelete` | `UndeleteOrganizationalUnit` |
-| `Modify` | `GetOrganizationalUnit` + `UpdateOrganizationalUnit` |
-| `Resources` | `client.Resources` |
-
-```go
-organizationalUnit, err := client.Sites.Get(ctx, &organizationalunitpb.GetOrganizationalUnitRequest{
-	Name: "organizationalUnits/my-organizational-unit",
-})
-if err != nil {
-	return err
-}
-fmt.Println(organizationalUnit.String())
 ```
 
 ### Resources

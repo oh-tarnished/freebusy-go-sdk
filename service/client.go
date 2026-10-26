@@ -18,8 +18,6 @@ import (
 	"github.com/shokki-engineering/freebusy-go/internal/gapic/availability"
 	"github.com/shokki-engineering/freebusy-go/internal/gapic/calendar"
 	"github.com/shokki-engineering/freebusy-go/internal/gapic/event"
-	"github.com/shokki-engineering/freebusy-go/internal/gapic/organization"
-	"github.com/shokki-engineering/freebusy-go/internal/gapic/organizationalunit"
 	"github.com/shokki-engineering/freebusy-go/internal/gapic/reservation"
 	"github.com/shokki-engineering/freebusy-go/internal/gapic/resource"
 	"github.com/shokki-engineering/freebusy-go/internal/gapic/webhook"
@@ -39,10 +37,6 @@ type Client struct {
 	Reservations *ReservationService
 	// Webhooks subscribes endpoints to changes in holds, reservations and inventory, and shows what was sent to each.
 	Webhooks *WebhookService
-	// Organizations manages the RFC 4519 'organization' object class, section 3.8 <https://www.rfc-editor.org/rfc/rfc4519.html#section-3.8>.
-	Organizations *OrganizationService
-	// Sites manages the RFC 4519 'organizationalUnit' object class, section 3.11 <https://www.rfc-editor.org/rfc/rfc4519.html#section-3.11>.
-	Sites *SiteService
 	// Resources manages the RFC 9073 VRESOURCE component as a catalogue, section 7.3 <https://www.rfc-editor.org/rfc/rfc9073.html#section-7.3>.
 	Resources *ResourceService
 	// Calendars manages the collections that Events belong to, RFC 5545 section 3.4 <https://www.rfc-editor.org/rfc/rfc5545.html#section-3.4>.
@@ -145,28 +139,6 @@ func NewClient(ctx context.Context, opts ...option.RequestOption) (*Client, erro
 		c.Webhooks = newWebhookService(gc, sc)
 	}
 	{
-		sc, conn, err := connFor("organizations")
-		if err != nil {
-			return fail(err)
-		}
-		gc, err := organization.NewOrganizationsClient(ctx, gapicOptions(conn)...)
-		if err != nil {
-			return fail(err)
-		}
-		c.Organizations = newOrganizationService(gc, sc)
-	}
-	{
-		sc, conn, err := connFor("sites")
-		if err != nil {
-			return fail(err)
-		}
-		gc, err := organizationalunit.NewOrganizationalUnitsClient(ctx, gapicOptions(conn)...)
-		if err != nil {
-			return fail(err)
-		}
-		c.Sites = newSiteService(gc, sc)
-	}
-	{
 		sc, conn, err := connFor("resources")
 		if err != nil {
 			return fail(err)
@@ -210,7 +182,6 @@ func NewClient(ctx context.Context, opts ...option.RequestOption) (*Client, erro
 		}
 		c.Availabilities = newAvailabilitiesService(gc, sc)
 	}
-	c.Sites.Resources = c.Resources
 	return c, nil
 }
 

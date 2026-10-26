@@ -116,8 +116,6 @@ func WithGRPCCallOption(o grpc.CallOption) RequestOption {
 // "holds"
 // "reservations"
 // "webhooks"
-// "organizations"
-// "sites"
 // "resources"
 // "calendars"
 // "events"
@@ -127,7 +125,7 @@ func WithGRPCCallOption(o grpc.CallOption) RequestOption {
 func WithService(key string, opts ...RequestOption) RequestOption {
 	return func(c *request.Config) error {
 		switch key {
-		case "availability", "holds", "reservations", "webhooks", "organizations", "sites", "resources", "calendars", "events", "availabilities":
+		case "availability", "holds", "reservations", "webhooks", "resources", "calendars", "events", "availabilities":
 		default:
 			return errors.New("option.WithService: no service " + key)
 		}

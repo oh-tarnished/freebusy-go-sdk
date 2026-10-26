@@ -19,8 +19,6 @@ import (
 	"github.com/shokki-engineering/freebusy-go/pb/availabilitypb"
 	"github.com/shokki-engineering/freebusy-go/pb/calendarpb"
 	"github.com/shokki-engineering/freebusy-go/pb/eventpb"
-	"github.com/shokki-engineering/freebusy-go/pb/organizationalunitpb"
-	"github.com/shokki-engineering/freebusy-go/pb/organizationpb"
 	"github.com/shokki-engineering/freebusy-go/pb/reservationpb"
 	"github.com/shokki-engineering/freebusy-go/pb/resourcepb"
 	"github.com/shokki-engineering/freebusy-go/pb/webhookpb"
@@ -53,72 +51,60 @@ type fake struct {
 // methods are the API's methods by gRPC path, with their request and
 // response types.
 var methods = map[string]struct{ in, out func() proto.Message }{
-	"/freebusy.allocation.v1.AllocationService/ComputeAvailability":                           {func() proto.Message { return new(allocationpb.ComputeAvailabilityRequest) }, func() proto.Message { return new(allocationpb.ComputeAvailabilityResponse) }},
-	"/freebusy.allocation.v1.AllocationService/CheckAvailability":                             {func() proto.Message { return new(allocationpb.CheckAvailabilityRequest) }, func() proto.Message { return new(allocationpb.CheckAvailabilityResponse) }},
-	"/freebusy.allocation.v1.AllocationService/BatchComputeAvailability":                      {func() proto.Message { return new(allocationpb.BatchComputeAvailabilityRequest) }, func() proto.Message { return new(allocationpb.BatchComputeAvailabilityResponse) }},
-	"/freebusy.allocation.v1.AllocationService/SearchAvailability":                            {func() proto.Message { return new(allocationpb.SearchAvailabilityRequest) }, func() proto.Message { return new(allocationpb.SearchAvailabilityResponse) }},
-	"/freebusy.allocation.v1.HoldService/CreateHold":                                          {func() proto.Message { return new(allocationpb.CreateHoldRequest) }, func() proto.Message { return new(allocationpb.Hold) }},
-	"/freebusy.allocation.v1.HoldService/GetHold":                                             {func() proto.Message { return new(allocationpb.GetHoldRequest) }, func() proto.Message { return new(allocationpb.Hold) }},
-	"/freebusy.allocation.v1.HoldService/ListHolds":                                           {func() proto.Message { return new(allocationpb.ListHoldsRequest) }, func() proto.Message { return new(allocationpb.ListHoldsResponse) }},
-	"/freebusy.allocation.v1.HoldService/ExtendHold":                                          {func() proto.Message { return new(allocationpb.ExtendHoldRequest) }, func() proto.Message { return new(allocationpb.Hold) }},
-	"/freebusy.allocation.v1.HoldService/ReleaseHold":                                         {func() proto.Message { return new(allocationpb.ReleaseHoldRequest) }, func() proto.Message { return new(allocationpb.Hold) }},
-	"/freebusy.allocation.v1.HoldService/DeleteHold":                                          {func() proto.Message { return new(allocationpb.DeleteHoldRequest) }, func() proto.Message { return new(emptypb.Empty) }},
-	"/freebusy.reservation.v1.ReservationService/CreateReservation":                           {func() proto.Message { return new(reservationpb.CreateReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
-	"/freebusy.reservation.v1.ReservationService/GetReservation":                              {func() proto.Message { return new(reservationpb.GetReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
-	"/freebusy.reservation.v1.ReservationService/ListReservations":                            {func() proto.Message { return new(reservationpb.ListReservationsRequest) }, func() proto.Message { return new(reservationpb.ListReservationsResponse) }},
-	"/freebusy.reservation.v1.ReservationService/UpdateReservation":                           {func() proto.Message { return new(reservationpb.UpdateReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
-	"/freebusy.reservation.v1.ReservationService/CancelReservation":                           {func() proto.Message { return new(reservationpb.CancelReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
-	"/freebusy.reservation.v1.ReservationService/RescheduleReservation":                       {func() proto.Message { return new(reservationpb.RescheduleReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
-	"/freebusy.webhook.v1.WebhookService/CreateWebhook":                                       {func() proto.Message { return new(webhookpb.CreateWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
-	"/freebusy.webhook.v1.WebhookService/GetWebhook":                                          {func() proto.Message { return new(webhookpb.GetWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
-	"/freebusy.webhook.v1.WebhookService/ListWebhooks":                                        {func() proto.Message { return new(webhookpb.ListWebhooksRequest) }, func() proto.Message { return new(webhookpb.ListWebhooksResponse) }},
-	"/freebusy.webhook.v1.WebhookService/UpdateWebhook":                                       {func() proto.Message { return new(webhookpb.UpdateWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
-	"/freebusy.webhook.v1.WebhookService/PauseWebhook":                                        {func() proto.Message { return new(webhookpb.PauseWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
-	"/freebusy.webhook.v1.WebhookService/ResumeWebhook":                                       {func() proto.Message { return new(webhookpb.ResumeWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
-	"/freebusy.webhook.v1.WebhookService/DeleteWebhook":                                       {func() proto.Message { return new(webhookpb.DeleteWebhookRequest) }, func() proto.Message { return new(emptypb.Empty) }},
-	"/freebusy.webhook.v1.WebhookService/RotateWebhookSecret":                                 {func() proto.Message { return new(webhookpb.RotateWebhookSecretRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
-	"/freebusy.webhook.v1.WebhookService/GetDelivery":                                         {func() proto.Message { return new(webhookpb.GetDeliveryRequest) }, func() proto.Message { return new(webhookpb.Delivery) }},
-	"/freebusy.webhook.v1.WebhookService/ListDeliveries":                                      {func() proto.Message { return new(webhookpb.ListDeliveriesRequest) }, func() proto.Message { return new(webhookpb.ListDeliveriesResponse) }},
-	"/freebusy.webhook.v1.WebhookService/RetryDelivery":                                       {func() proto.Message { return new(webhookpb.RetryDeliveryRequest) }, func() proto.Message { return new(webhookpb.Delivery) }},
-	"/protobuf.rfc4519.organization.v1.Organizations/GetOrganization":                         {func() proto.Message { return new(organizationpb.GetOrganizationRequest) }, func() proto.Message { return new(organizationpb.Organization) }},
-	"/protobuf.rfc4519.organization.v1.Organizations/ListOrganizations":                       {func() proto.Message { return new(organizationpb.ListOrganizationsRequest) }, func() proto.Message { return new(organizationpb.ListOrganizationsResponse) }},
-	"/protobuf.rfc4519.organization.v1.Organizations/CreateOrganization":                      {func() proto.Message { return new(organizationpb.CreateOrganizationRequest) }, func() proto.Message { return new(organizationpb.Organization) }},
-	"/protobuf.rfc4519.organization.v1.Organizations/UpdateOrganization":                      {func() proto.Message { return new(organizationpb.UpdateOrganizationRequest) }, func() proto.Message { return new(organizationpb.Organization) }},
-	"/protobuf.rfc4519.organization.v1.Organizations/DeleteOrganization":                      {func() proto.Message { return new(organizationpb.DeleteOrganizationRequest) }, func() proto.Message { return new(emptypb.Empty) }},
-	"/protobuf.rfc4519.organization.v1.Organizations/UndeleteOrganization":                    {func() proto.Message { return new(organizationpb.UndeleteOrganizationRequest) }, func() proto.Message { return new(organizationpb.Organization) }},
-	"/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/GetOrganizationalUnit":      {func() proto.Message { return new(organizationalunitpb.GetOrganizationalUnitRequest) }, func() proto.Message { return new(organizationalunitpb.OrganizationalUnit) }},
-	"/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/ListOrganizationalUnits":    {func() proto.Message { return new(organizationalunitpb.ListOrganizationalUnitsRequest) }, func() proto.Message { return new(organizationalunitpb.ListOrganizationalUnitsResponse) }},
-	"/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/CreateOrganizationalUnit":   {func() proto.Message { return new(organizationalunitpb.CreateOrganizationalUnitRequest) }, func() proto.Message { return new(organizationalunitpb.OrganizationalUnit) }},
-	"/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/UpdateOrganizationalUnit":   {func() proto.Message { return new(organizationalunitpb.UpdateOrganizationalUnitRequest) }, func() proto.Message { return new(organizationalunitpb.OrganizationalUnit) }},
-	"/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/DeleteOrganizationalUnit":   {func() proto.Message { return new(organizationalunitpb.DeleteOrganizationalUnitRequest) }, func() proto.Message { return new(emptypb.Empty) }},
-	"/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/UndeleteOrganizationalUnit": {func() proto.Message { return new(organizationalunitpb.UndeleteOrganizationalUnitRequest) }, func() proto.Message { return new(organizationalunitpb.OrganizationalUnit) }},
-	"/protobuf.rfc9073.resource.v1.Resources/GetResource":                                     {func() proto.Message { return new(resourcepb.GetResourceRequest) }, func() proto.Message { return new(resourcepb.Resource) }},
-	"/protobuf.rfc9073.resource.v1.Resources/ListResources":                                   {func() proto.Message { return new(resourcepb.ListResourcesRequest) }, func() proto.Message { return new(resourcepb.ListResourcesResponse) }},
-	"/protobuf.rfc9073.resource.v1.Resources/CreateResource":                                  {func() proto.Message { return new(resourcepb.CreateResourceRequest) }, func() proto.Message { return new(resourcepb.Resource) }},
-	"/protobuf.rfc9073.resource.v1.Resources/UpdateResource":                                  {func() proto.Message { return new(resourcepb.UpdateResourceRequest) }, func() proto.Message { return new(resourcepb.Resource) }},
-	"/protobuf.rfc9073.resource.v1.Resources/DeleteResource":                                  {func() proto.Message { return new(resourcepb.DeleteResourceRequest) }, func() proto.Message { return new(emptypb.Empty) }},
-	"/protobuf.rfc9073.resource.v1.Resources/UndeleteResource":                                {func() proto.Message { return new(resourcepb.UndeleteResourceRequest) }, func() proto.Message { return new(resourcepb.Resource) }},
-	"/protobuf.rfc5545.calendar.v1.Calendars/GetCalendar":                                     {func() proto.Message { return new(calendarpb.GetCalendarRequest) }, func() proto.Message { return new(calendarpb.Calendar) }},
-	"/protobuf.rfc5545.calendar.v1.Calendars/ListCalendars":                                   {func() proto.Message { return new(calendarpb.ListCalendarsRequest) }, func() proto.Message { return new(calendarpb.ListCalendarsResponse) }},
-	"/protobuf.rfc5545.calendar.v1.Calendars/CreateCalendar":                                  {func() proto.Message { return new(calendarpb.CreateCalendarRequest) }, func() proto.Message { return new(calendarpb.Calendar) }},
-	"/protobuf.rfc5545.calendar.v1.Calendars/UpdateCalendar":                                  {func() proto.Message { return new(calendarpb.UpdateCalendarRequest) }, func() proto.Message { return new(calendarpb.Calendar) }},
-	"/protobuf.rfc5545.calendar.v1.Calendars/DeleteCalendar":                                  {func() proto.Message { return new(calendarpb.DeleteCalendarRequest) }, func() proto.Message { return new(emptypb.Empty) }},
-	"/protobuf.rfc5545.calendar.v1.Calendars/UndeleteCalendar":                                {func() proto.Message { return new(calendarpb.UndeleteCalendarRequest) }, func() proto.Message { return new(calendarpb.Calendar) }},
-	"/protobuf.rfc5545.calendar.v1.Calendars/QueryFreeBusy":                                   {func() proto.Message { return new(calendarpb.QueryFreeBusyRequest) }, func() proto.Message { return new(calendarpb.QueryFreeBusyResponse) }},
-	"/protobuf.rfc5545.event.v1.Events/GetEvent":                                              {func() proto.Message { return new(eventpb.GetEventRequest) }, func() proto.Message { return new(eventpb.Event) }},
-	"/protobuf.rfc5545.event.v1.Events/ListEvents":                                            {func() proto.Message { return new(eventpb.ListEventsRequest) }, func() proto.Message { return new(eventpb.ListEventsResponse) }},
-	"/protobuf.rfc5545.event.v1.Events/BatchGetEvents":                                        {func() proto.Message { return new(eventpb.BatchGetEventsRequest) }, func() proto.Message { return new(eventpb.BatchGetEventsResponse) }},
-	"/protobuf.rfc5545.event.v1.Events/CreateEvent":                                           {func() proto.Message { return new(eventpb.CreateEventRequest) }, func() proto.Message { return new(eventpb.Event) }},
-	"/protobuf.rfc5545.event.v1.Events/UpdateEvent":                                           {func() proto.Message { return new(eventpb.UpdateEventRequest) }, func() proto.Message { return new(eventpb.Event) }},
-	"/protobuf.rfc5545.event.v1.Events/DeleteEvent":                                           {func() proto.Message { return new(eventpb.DeleteEventRequest) }, func() proto.Message { return new(emptypb.Empty) }},
-	"/protobuf.rfc5545.event.v1.Events/ExpandEvent":                                           {func() proto.Message { return new(eventpb.ExpandEventRequest) }, func() proto.Message { return new(eventpb.ExpandEventResponse) }},
-	"/protobuf.rfc5545.event.v1.Events/UndeleteEvent":                                         {func() proto.Message { return new(eventpb.UndeleteEventRequest) }, func() proto.Message { return new(eventpb.Event) }},
-	"/protobuf.rfc7953.availability.v1.Availabilities/GetAvailability":                        {func() proto.Message { return new(availabilitypb.GetAvailabilityRequest) }, func() proto.Message { return new(availabilitypb.Availability) }},
-	"/protobuf.rfc7953.availability.v1.Availabilities/ListAvailabilities":                     {func() proto.Message { return new(availabilitypb.ListAvailabilitiesRequest) }, func() proto.Message { return new(availabilitypb.ListAvailabilitiesResponse) }},
-	"/protobuf.rfc7953.availability.v1.Availabilities/CreateAvailability":                     {func() proto.Message { return new(availabilitypb.CreateAvailabilityRequest) }, func() proto.Message { return new(availabilitypb.Availability) }},
-	"/protobuf.rfc7953.availability.v1.Availabilities/UpdateAvailability":                     {func() proto.Message { return new(availabilitypb.UpdateAvailabilityRequest) }, func() proto.Message { return new(availabilitypb.Availability) }},
-	"/protobuf.rfc7953.availability.v1.Availabilities/DeleteAvailability":                     {func() proto.Message { return new(availabilitypb.DeleteAvailabilityRequest) }, func() proto.Message { return new(emptypb.Empty) }},
-	"/protobuf.rfc7953.availability.v1.Availabilities/UndeleteAvailability":                   {func() proto.Message { return new(availabilitypb.UndeleteAvailabilityRequest) }, func() proto.Message { return new(availabilitypb.Availability) }},
+	"/freebusy.allocation.v1.AllocationService/ComputeAvailability":         {func() proto.Message { return new(allocationpb.ComputeAvailabilityRequest) }, func() proto.Message { return new(allocationpb.ComputeAvailabilityResponse) }},
+	"/freebusy.allocation.v1.AllocationService/CheckAvailability":           {func() proto.Message { return new(allocationpb.CheckAvailabilityRequest) }, func() proto.Message { return new(allocationpb.CheckAvailabilityResponse) }},
+	"/freebusy.allocation.v1.AllocationService/BatchComputeAvailability":    {func() proto.Message { return new(allocationpb.BatchComputeAvailabilityRequest) }, func() proto.Message { return new(allocationpb.BatchComputeAvailabilityResponse) }},
+	"/freebusy.allocation.v1.AllocationService/SearchAvailability":          {func() proto.Message { return new(allocationpb.SearchAvailabilityRequest) }, func() proto.Message { return new(allocationpb.SearchAvailabilityResponse) }},
+	"/freebusy.allocation.v1.HoldService/CreateHold":                        {func() proto.Message { return new(allocationpb.CreateHoldRequest) }, func() proto.Message { return new(allocationpb.Hold) }},
+	"/freebusy.allocation.v1.HoldService/GetHold":                           {func() proto.Message { return new(allocationpb.GetHoldRequest) }, func() proto.Message { return new(allocationpb.Hold) }},
+	"/freebusy.allocation.v1.HoldService/ListHolds":                         {func() proto.Message { return new(allocationpb.ListHoldsRequest) }, func() proto.Message { return new(allocationpb.ListHoldsResponse) }},
+	"/freebusy.allocation.v1.HoldService/ExtendHold":                        {func() proto.Message { return new(allocationpb.ExtendHoldRequest) }, func() proto.Message { return new(allocationpb.Hold) }},
+	"/freebusy.allocation.v1.HoldService/ReleaseHold":                       {func() proto.Message { return new(allocationpb.ReleaseHoldRequest) }, func() proto.Message { return new(allocationpb.Hold) }},
+	"/freebusy.allocation.v1.HoldService/DeleteHold":                        {func() proto.Message { return new(allocationpb.DeleteHoldRequest) }, func() proto.Message { return new(emptypb.Empty) }},
+	"/freebusy.reservation.v1.ReservationService/CreateReservation":         {func() proto.Message { return new(reservationpb.CreateReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
+	"/freebusy.reservation.v1.ReservationService/GetReservation":            {func() proto.Message { return new(reservationpb.GetReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
+	"/freebusy.reservation.v1.ReservationService/ListReservations":          {func() proto.Message { return new(reservationpb.ListReservationsRequest) }, func() proto.Message { return new(reservationpb.ListReservationsResponse) }},
+	"/freebusy.reservation.v1.ReservationService/UpdateReservation":         {func() proto.Message { return new(reservationpb.UpdateReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
+	"/freebusy.reservation.v1.ReservationService/CancelReservation":         {func() proto.Message { return new(reservationpb.CancelReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
+	"/freebusy.reservation.v1.ReservationService/RescheduleReservation":     {func() proto.Message { return new(reservationpb.RescheduleReservationRequest) }, func() proto.Message { return new(reservationpb.Reservation) }},
+	"/freebusy.webhook.v1.WebhookService/CreateWebhook":                     {func() proto.Message { return new(webhookpb.CreateWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
+	"/freebusy.webhook.v1.WebhookService/GetWebhook":                        {func() proto.Message { return new(webhookpb.GetWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
+	"/freebusy.webhook.v1.WebhookService/ListWebhooks":                      {func() proto.Message { return new(webhookpb.ListWebhooksRequest) }, func() proto.Message { return new(webhookpb.ListWebhooksResponse) }},
+	"/freebusy.webhook.v1.WebhookService/UpdateWebhook":                     {func() proto.Message { return new(webhookpb.UpdateWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
+	"/freebusy.webhook.v1.WebhookService/PauseWebhook":                      {func() proto.Message { return new(webhookpb.PauseWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
+	"/freebusy.webhook.v1.WebhookService/ResumeWebhook":                     {func() proto.Message { return new(webhookpb.ResumeWebhookRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
+	"/freebusy.webhook.v1.WebhookService/DeleteWebhook":                     {func() proto.Message { return new(webhookpb.DeleteWebhookRequest) }, func() proto.Message { return new(emptypb.Empty) }},
+	"/freebusy.webhook.v1.WebhookService/RotateWebhookSecret":               {func() proto.Message { return new(webhookpb.RotateWebhookSecretRequest) }, func() proto.Message { return new(webhookpb.Webhook) }},
+	"/freebusy.webhook.v1.WebhookService/GetDelivery":                       {func() proto.Message { return new(webhookpb.GetDeliveryRequest) }, func() proto.Message { return new(webhookpb.Delivery) }},
+	"/freebusy.webhook.v1.WebhookService/ListDeliveries":                    {func() proto.Message { return new(webhookpb.ListDeliveriesRequest) }, func() proto.Message { return new(webhookpb.ListDeliveriesResponse) }},
+	"/freebusy.webhook.v1.WebhookService/RetryDelivery":                     {func() proto.Message { return new(webhookpb.RetryDeliveryRequest) }, func() proto.Message { return new(webhookpb.Delivery) }},
+	"/protobuf.rfc9073.resource.v1.Resources/GetResource":                   {func() proto.Message { return new(resourcepb.GetResourceRequest) }, func() proto.Message { return new(resourcepb.Resource) }},
+	"/protobuf.rfc9073.resource.v1.Resources/ListResources":                 {func() proto.Message { return new(resourcepb.ListResourcesRequest) }, func() proto.Message { return new(resourcepb.ListResourcesResponse) }},
+	"/protobuf.rfc9073.resource.v1.Resources/CreateResource":                {func() proto.Message { return new(resourcepb.CreateResourceRequest) }, func() proto.Message { return new(resourcepb.Resource) }},
+	"/protobuf.rfc9073.resource.v1.Resources/UpdateResource":                {func() proto.Message { return new(resourcepb.UpdateResourceRequest) }, func() proto.Message { return new(resourcepb.Resource) }},
+	"/protobuf.rfc9073.resource.v1.Resources/DeleteResource":                {func() proto.Message { return new(resourcepb.DeleteResourceRequest) }, func() proto.Message { return new(emptypb.Empty) }},
+	"/protobuf.rfc9073.resource.v1.Resources/UndeleteResource":              {func() proto.Message { return new(resourcepb.UndeleteResourceRequest) }, func() proto.Message { return new(resourcepb.Resource) }},
+	"/protobuf.rfc5545.calendar.v1.Calendars/GetCalendar":                   {func() proto.Message { return new(calendarpb.GetCalendarRequest) }, func() proto.Message { return new(calendarpb.Calendar) }},
+	"/protobuf.rfc5545.calendar.v1.Calendars/ListCalendars":                 {func() proto.Message { return new(calendarpb.ListCalendarsRequest) }, func() proto.Message { return new(calendarpb.ListCalendarsResponse) }},
+	"/protobuf.rfc5545.calendar.v1.Calendars/CreateCalendar":                {func() proto.Message { return new(calendarpb.CreateCalendarRequest) }, func() proto.Message { return new(calendarpb.Calendar) }},
+	"/protobuf.rfc5545.calendar.v1.Calendars/UpdateCalendar":                {func() proto.Message { return new(calendarpb.UpdateCalendarRequest) }, func() proto.Message { return new(calendarpb.Calendar) }},
+	"/protobuf.rfc5545.calendar.v1.Calendars/DeleteCalendar":                {func() proto.Message { return new(calendarpb.DeleteCalendarRequest) }, func() proto.Message { return new(emptypb.Empty) }},
+	"/protobuf.rfc5545.calendar.v1.Calendars/UndeleteCalendar":              {func() proto.Message { return new(calendarpb.UndeleteCalendarRequest) }, func() proto.Message { return new(calendarpb.Calendar) }},
+	"/protobuf.rfc5545.calendar.v1.Calendars/QueryFreeBusy":                 {func() proto.Message { return new(calendarpb.QueryFreeBusyRequest) }, func() proto.Message { return new(calendarpb.QueryFreeBusyResponse) }},
+	"/protobuf.rfc5545.event.v1.Events/GetEvent":                            {func() proto.Message { return new(eventpb.GetEventRequest) }, func() proto.Message { return new(eventpb.Event) }},
+	"/protobuf.rfc5545.event.v1.Events/ListEvents":                          {func() proto.Message { return new(eventpb.ListEventsRequest) }, func() proto.Message { return new(eventpb.ListEventsResponse) }},
+	"/protobuf.rfc5545.event.v1.Events/BatchGetEvents":                      {func() proto.Message { return new(eventpb.BatchGetEventsRequest) }, func() proto.Message { return new(eventpb.BatchGetEventsResponse) }},
+	"/protobuf.rfc5545.event.v1.Events/CreateEvent":                         {func() proto.Message { return new(eventpb.CreateEventRequest) }, func() proto.Message { return new(eventpb.Event) }},
+	"/protobuf.rfc5545.event.v1.Events/UpdateEvent":                         {func() proto.Message { return new(eventpb.UpdateEventRequest) }, func() proto.Message { return new(eventpb.Event) }},
+	"/protobuf.rfc5545.event.v1.Events/DeleteEvent":                         {func() proto.Message { return new(eventpb.DeleteEventRequest) }, func() proto.Message { return new(emptypb.Empty) }},
+	"/protobuf.rfc5545.event.v1.Events/ExpandEvent":                         {func() proto.Message { return new(eventpb.ExpandEventRequest) }, func() proto.Message { return new(eventpb.ExpandEventResponse) }},
+	"/protobuf.rfc5545.event.v1.Events/UndeleteEvent":                       {func() proto.Message { return new(eventpb.UndeleteEventRequest) }, func() proto.Message { return new(eventpb.Event) }},
+	"/protobuf.rfc7953.availability.v1.Availabilities/GetAvailability":      {func() proto.Message { return new(availabilitypb.GetAvailabilityRequest) }, func() proto.Message { return new(availabilitypb.Availability) }},
+	"/protobuf.rfc7953.availability.v1.Availabilities/ListAvailabilities":   {func() proto.Message { return new(availabilitypb.ListAvailabilitiesRequest) }, func() proto.Message { return new(availabilitypb.ListAvailabilitiesResponse) }},
+	"/protobuf.rfc7953.availability.v1.Availabilities/CreateAvailability":   {func() proto.Message { return new(availabilitypb.CreateAvailabilityRequest) }, func() proto.Message { return new(availabilitypb.Availability) }},
+	"/protobuf.rfc7953.availability.v1.Availabilities/UpdateAvailability":   {func() proto.Message { return new(availabilitypb.UpdateAvailabilityRequest) }, func() proto.Message { return new(availabilitypb.Availability) }},
+	"/protobuf.rfc7953.availability.v1.Availabilities/DeleteAvailability":   {func() proto.Message { return new(availabilitypb.DeleteAvailabilityRequest) }, func() proto.Message { return new(emptypb.Empty) }},
+	"/protobuf.rfc7953.availability.v1.Availabilities/UndeleteAvailability": {func() proto.Message { return new(availabilitypb.UndeleteAvailabilityRequest) }, func() proto.Message { return new(availabilitypb.Availability) }},
 }
 
 func startFake(t *testing.T) (*fake, string) {
@@ -388,62 +374,6 @@ func TestEveryMethod(t *testing.T) {
 		}},
 		{"Webhooks.Deliveries.Retry", "/freebusy.webhook.v1.WebhookService/RetryDelivery", func() error {
 			_, err := c.Webhooks.Deliveries.Retry(ctx, filled(&webhookpb.RetryDeliveryRequest{}, "name"))
-			return err
-		}},
-		{"Organizations.Get", "/protobuf.rfc4519.organization.v1.Organizations/GetOrganization", func() error {
-			_, err := c.Organizations.Get(ctx, filled(&organizationpb.GetOrganizationRequest{}, "name"))
-			return err
-		}},
-		{"Organizations.List", "/protobuf.rfc4519.organization.v1.Organizations/ListOrganizations", func() error {
-			if _, err := c.Organizations.List(ctx, filled(&organizationpb.ListOrganizationsRequest{})); err != nil {
-				return err
-			}
-			pager := c.Organizations.ListAutoPaging(ctx, filled(&organizationpb.ListOrganizationsRequest{}))
-			for pager.Next() {
-			}
-			return pager.Err()
-		}},
-		{"Organizations.New", "/protobuf.rfc4519.organization.v1.Organizations/CreateOrganization", func() error {
-			_, err := c.Organizations.New(ctx, filled(&organizationpb.CreateOrganizationRequest{}, "organization"))
-			return err
-		}},
-		{"Organizations.Update", "/protobuf.rfc4519.organization.v1.Organizations/UpdateOrganization", func() error {
-			_, err := c.Organizations.Update(ctx, filled(&organizationpb.UpdateOrganizationRequest{}, "organization"))
-			return err
-		}},
-		{"Organizations.Delete", "/protobuf.rfc4519.organization.v1.Organizations/DeleteOrganization", func() error {
-			return c.Organizations.Delete(ctx, filled(&organizationpb.DeleteOrganizationRequest{}, "name"))
-		}},
-		{"Organizations.Undelete", "/protobuf.rfc4519.organization.v1.Organizations/UndeleteOrganization", func() error {
-			_, err := c.Organizations.Undelete(ctx, filled(&organizationpb.UndeleteOrganizationRequest{}, "name"))
-			return err
-		}},
-		{"Sites.Get", "/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/GetOrganizationalUnit", func() error {
-			_, err := c.Sites.Get(ctx, filled(&organizationalunitpb.GetOrganizationalUnitRequest{}, "name"))
-			return err
-		}},
-		{"Sites.List", "/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/ListOrganizationalUnits", func() error {
-			if _, err := c.Sites.List(ctx, filled(&organizationalunitpb.ListOrganizationalUnitsRequest{})); err != nil {
-				return err
-			}
-			pager := c.Sites.ListAutoPaging(ctx, filled(&organizationalunitpb.ListOrganizationalUnitsRequest{}))
-			for pager.Next() {
-			}
-			return pager.Err()
-		}},
-		{"Sites.New", "/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/CreateOrganizationalUnit", func() error {
-			_, err := c.Sites.New(ctx, filled(&organizationalunitpb.CreateOrganizationalUnitRequest{}, "organizational_unit"))
-			return err
-		}},
-		{"Sites.Update", "/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/UpdateOrganizationalUnit", func() error {
-			_, err := c.Sites.Update(ctx, filled(&organizationalunitpb.UpdateOrganizationalUnitRequest{}, "organizational_unit"))
-			return err
-		}},
-		{"Sites.Delete", "/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/DeleteOrganizationalUnit", func() error {
-			return c.Sites.Delete(ctx, filled(&organizationalunitpb.DeleteOrganizationalUnitRequest{}, "name"))
-		}},
-		{"Sites.Undelete", "/protobuf.rfc4519.organizational_unit.v1.OrganizationalUnits/UndeleteOrganizationalUnit", func() error {
-			_, err := c.Sites.Undelete(ctx, filled(&organizationalunitpb.UndeleteOrganizationalUnitRequest{}, "name"))
 			return err
 		}},
 		{"Resources.Get", "/protobuf.rfc9073.resource.v1.Resources/GetResource", func() error {
