@@ -1,6 +1,6 @@
 module github.com/shokki-engineering/freebusy-go
 
-go 1.26.4
+go 1.26.10
 
 require (
 	github.com/googleapis/gax-go/v2 v2.27.0
