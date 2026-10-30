@@ -116,6 +116,11 @@ func ParseWebhook(r *http.Request, secrets ...string) (*WebhookEvent, error) {
 // "v1,<base64 HMAC-SHA256>" of "<webhook-id>.<webhook-timestamp>.<body>", and
 // one must match under one of secrets. The timestamp must be within
 // WebhookTolerance of now.
+//
+// Every secret is tried. One that is not valid base64 is skipped, so a bad
+// secret configured beside a good one (mid-rotation, say) never blocks a
+// delivery the good one verifies. When none verifies, the error is
+// ErrWebhookSignature, joined with what was wrong with each bad secret.
 func VerifyWebhook(header http.Header, body []byte, secrets ...string) error {
 	id, ts := header.Get("webhook-id"), header.Get("webhook-timestamp")
 	sent, err := strconv.ParseInt(ts, 10, 64)
@@ -127,10 +132,12 @@ func VerifyWebhook(header http.Header, body []byte, secrets ...string) error {
 	}
 	signed := []byte(id + "." + ts + ".")
 	signed = append(signed, body...)
-	for _, secret := range secrets {
+	var bad []error
+	for i, secret := range secrets {
 		key, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(secret, "whsec_"))
 		if err != nil {
-			return fmt.Errorf("freebusy: webhook secret: %w", err)
+			bad = append(bad, fmt.Errorf("freebusy: webhook secret #%d: %w", i, err))
+			continue
 		}
 		mac := hmac.New(sha256.New, key)
 		mac.Write(signed)
@@ -145,6 +152,9 @@ func VerifyWebhook(header http.Header, body []byte, secrets ...string) error {
 				return nil
 			}
 		}
+	}
+	if len(bad) > 0 {
+		return errors.Join(append([]error{ErrWebhookSignature}, bad...)...)
 	}
 	return ErrWebhookSignature
 }

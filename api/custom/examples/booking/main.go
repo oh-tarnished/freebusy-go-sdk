@@ -134,7 +134,7 @@ func run(ctx context.Context) error {
 
 	// Three customers want 10:00 and there are two rooms.
 	var booked []*reservationpb.Reservation
-	for _, customer := range []string{"dana", "lee", "sam"} {
+	for _, customer := range []string{"john-doe", "jane-doe", "j-doe"} {
 		res, err := book(ctx, client, "users/"+customer+"-"+run, at(10), at(18), time.Hour)
 		if err != nil {
 			return err

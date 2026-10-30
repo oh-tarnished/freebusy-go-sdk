@@ -43,10 +43,11 @@ const (
 // test in `docs/adding-data.md` for a package rather than a field, and
 // rule 8's for full CRUD. Neither replaces the other and both stay.
 //
-// A flat collection, "resources/{resource}", for the reason
-// OrganizationalUnit is flat: section 7.3 defines the component's properties
-// and says nothing about where it sits, so nesting it under a calendar or an
-// organizational unit would assert a containment the RFC does not require.
+// A flat collection, "resources/{resource}": section 7.3 defines the
+// component's properties and says nothing about where it sits, so nesting it
+// under a calendar or anything else would assert a containment the RFC does
+// not require. Grouping resources -- by site, operator or tenant -- is the
+// consumer's, with whatever model it has for those.
 //
 // Reference: RFC 9073 "Event Publishing Extensions to iCalendar", section 7.3.
 // https://www.rfc-editor.org/rfc/rfc9073.html#section-7.3
@@ -87,15 +88,8 @@ type Resource struct {
 	// free-standing resource is not, and without this field nothing can ask
 	// when it is busy -- RFC 5545 section 3.6.4 <https://www.rfc-editor.org/rfc/rfc5545.html#section-3.6.4>'s free/busy query is addressed
 	// to a calendar. The field exists despite having no RFC property behind it,
-	// the same trade OrganizationalUnit.organization records.
+	// because a resource no calendar holds cannot be booked.
 	Calendar string `protobuf:"bytes,9,opt,name=calendar,proto3" json:"calendar,omitempty"`
-	// The organizational unit this resource belongs to, e.g. the car park a bay
-	// is in.
-	//
-	// Native, for the reason above: left unset, a resource is undiscoverable
-	// from the unit that operates it, and listing what a site has is the first
-	// question a catalogue is asked.
-	OrganizationalUnit string `protobuf:"bytes,10,opt,name=organizational_unit,json=organizationalUnit,proto3" json:"organizational_unit,omitempty"`
 	// When the resource was created.
 	CreateTime *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
 	// When the resource was last modified.
@@ -205,13 +199,6 @@ func (x *Resource) GetCalendar() string {
 	return ""
 }
 
-func (x *Resource) GetOrganizationalUnit() string {
-	if x != nil {
-		return x.OrganizationalUnit
-	}
-	return ""
-}
-
 func (x *Resource) GetCreateTime() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreateTime
@@ -251,7 +238,7 @@ var File_protobuf_rfc9073_resource_v1_resource_proto protoreflect.FileDescriptor
 
 const file_protobuf_rfc9073_resource_v1_resource_proto_rawDesc = "" +
 	"\n" +
-	"+protobuf/rfc9073/resource/v1/resource.proto\x12\x1cprotobuf.rfc9073.resource.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18google/type/latlng.proto\x1a(protobuf/rfc9073/resource/v1/types.proto\"\xb9\a\n" +
+	"+protobuf/rfc9073/resource/v1/resource.proto\x12\x1cprotobuf.rfc9073.resource.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18google/type/latlng.proto\x1a(protobuf/rfc9073/resource/v1/types.proto\"\xee\x06\n" +
 	"\bResource\x122\n" +
 	"\x04name\x18\x01 \x01(\tB\x1e\xe0A\b\xbaH\x18\xd8\x01\x01r\x132\x11^resources/[^/]+$R\x04name\x12(\n" +
 	"\x03uid\x18\x02 \x01(\tB\x16\xe0A\x03\xe2\x8c\xcf\xd7\b\x02\b\x01\xbaH\b\xd8\x01\x01r\x03\xb0\x01\x01R\x03uid\x12!\n" +
@@ -262,10 +249,7 @@ const file_protobuf_rfc9073_resource_v1_resource_proto_rawDesc = "" +
 	"\bposition\x18\a \x01(\v2\x13.google.type.LatLngB\x03\xe0A\x01R\bposition\x12Z\n" +
 	"\x0fstructured_data\x18\b \x03(\v2,.protobuf.rfc9073.resource.v1.StructuredDataB\x03\xe0A\x01R\x0estructuredData\x12E\n" +
 	"\bcalendar\x18\t \x01(\tB)\xe0A\x01\xfaA#\n" +
-	"!the-protobuf-project.org/CalendarR\bcalendar\x12d\n" +
-	"\x13organizational_unit\x18\n" +
-	" \x01(\tB3\xe0A\x01\xfaA-\n" +
-	"+the-protobuf-project.org/OrganizationalUnitR\x12organizationalUnit\x12@\n" +
+	"!the-protobuf-project.org/CalendarR\bcalendar\x12@\n" +
 	"\vcreate_time\x18\v \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\n" +
 	"createTime\x12@\n" +
 	"\vupdate_time\x18\f \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\n" +
@@ -275,10 +259,11 @@ const file_protobuf_rfc9073_resource_v1_resource_proto_rawDesc = "" +
 	"deleteTime\x12@\n" +
 	"\vexpire_time\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\n" +
 	"expireTime:Q\xeaAN\n" +
-	"!the-protobuf-project.org/Resource\x12\x14resources/{resource}*\tresources2\bresourceB\x90\x01\n" +
+	"!the-protobuf-project.org/Resource\x12\x14resources/{resource}*\tresources2\bresourceJ\x04\b\n" +
+	"\x10\vR\x13organizational_unitB\x90\x01\n" +
 	"9io.github.theprotobufproject.protobuf.rfc9073.resource.v1B\rResourceProtoP\x01ZBgithub.com/shokki-engineering/freebusy-go/pb/resourcepb;resourcepbb\x06proto3\xd2\xf6\x03P\b\x00\x12J\n" +
 	"&\n" +
-	"\tbuf.build\x12\x14the-protobuf-project\x1a\x03rfc\x12 cc82b3b15066438ba44e89dad69e9f8a\x18\x00"
+	"\tbuf.build\x12\x14the-protobuf-project\x1a\x03rfc\x12 3aba0422074b4341aa0f8df07c3263b7\x18\x00"
 
 var (
 	file_protobuf_rfc9073_resource_v1_resource_proto_rawDescOnce sync.Once

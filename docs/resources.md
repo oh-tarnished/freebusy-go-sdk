@@ -76,8 +76,8 @@ and the `next_page_token` from the previous response. An empty
 expire; do not construct or store them.
 
 Filtering uses the AIP-160 expression language over the resource's own
-fields -- `organizational_unit="organizationalUnits/car-park-3"` lists
-what one site holds, and `resource_types:"room"` narrows by kind, since
+fields -- `resource_types:"room"` narrows by kind, and
+`calendar="calendars/bay-14"` finds what one calendar schedules, since
 the collection is flat rather than nested. Results carry no guaranteed
 order.
 

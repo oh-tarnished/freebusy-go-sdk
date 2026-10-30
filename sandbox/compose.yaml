@@ -11,7 +11,7 @@ name: freebusy-sandbox
 
 services:
   freebusy:
-    image: ghcr.io/shokki-engineering/freebusy:1.0.0-rc.1
+    image: ghcr.io/shokki-engineering/freebusy:1.0.0-rc.2.1
     network_mode: host
     environment:
       FREEBUSY_DATABASE__POSTGRES__HOST: 127.0.0.1
@@ -28,7 +28,7 @@ services:
         condition: service_completed_successfully
 
   migrate:
-    image: ghcr.io/shokki-engineering/freebusy-migrations:1.0.0-rc.1
+    image: ghcr.io/shokki-engineering/freebusy-migrations:1.0.0-rc.2.1
     network_mode: host
     command: ["--url", "postgres://postgres:sandbox@127.0.0.1:5432/freebusydb?sslmode=disable"]
     depends_on:

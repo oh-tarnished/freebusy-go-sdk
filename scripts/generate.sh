@@ -6,7 +6,7 @@
 # Needs buf, protoc-gen-sdk and protoc-gen-go_gapic on PATH (CONTRIBUTING.md).
 set -euo pipefail
 cd "$(dirname "$0")/../api"
-buf build buf.build/the-protobuf-project/rfc:cc82b3b15066438ba44e89dad69e9f8a -o rfc.binpb
+buf build buf.build/the-protobuf-project/rfc:3aba0422074b4341aa0f8df07c3263b7 -o rfc.binpb
 buf generate
 cd ..
 go mod tidy

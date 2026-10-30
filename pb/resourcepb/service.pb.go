@@ -41,7 +41,7 @@ const file_protobuf_rfc9073_resource_v1_service_proto_rawDesc = "" +
 	"\x10UndeleteResource\x125.protobuf.rfc9073.resource.v1.UndeleteResourceRequest\x1a&.protobuf.rfc9073.resource.v1.Resource\"1\xdaA\x04name\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/{name=resources/*}:undeleteB\x8f\x01\n" +
 	"9io.github.theprotobufproject.protobuf.rfc9073.resource.v1B\fServiceProtoP\x01ZBgithub.com/shokki-engineering/freebusy-go/pb/resourcepb;resourcepbb\x06proto3\xd2\xf6\x03P\b\x00\x12J\n" +
 	"&\n" +
-	"\tbuf.build\x12\x14the-protobuf-project\x1a\x03rfc\x12 cc82b3b15066438ba44e89dad69e9f8a\x18\x00"
+	"\tbuf.build\x12\x14the-protobuf-project\x1a\x03rfc\x12 3aba0422074b4341aa0f8df07c3263b7\x18\x00"
 
 var file_protobuf_rfc9073_resource_v1_service_proto_goTypes = []any{
 	(*GetResourceRequest)(nil),      // 0: protobuf.rfc9073.resource.v1.GetResourceRequest

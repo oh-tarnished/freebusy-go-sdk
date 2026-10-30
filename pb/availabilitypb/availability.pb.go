@@ -344,7 +344,7 @@ const file_protobuf_rfc7953_availability_v1_availability_proto_rawDesc = "" +
 	"\bend_formB\xa0\x01\n" +
 	"=io.github.theprotobufproject.protobuf.rfc7953.availability.v1B\x11AvailabilityProtoP\x01ZJgithub.com/shokki-engineering/freebusy-go/pb/availabilitypb;availabilitypbb\x06proto3\xd2\xf6\x03P\b\x00\x12J\n" +
 	"&\n" +
-	"\tbuf.build\x12\x14the-protobuf-project\x1a\x03rfc\x12 cc82b3b15066438ba44e89dad69e9f8a\x18\x00"
+	"\tbuf.build\x12\x14the-protobuf-project\x1a\x03rfc\x12 3aba0422074b4341aa0f8df07c3263b7\x18\x00"
 
 var (
 	file_protobuf_rfc7953_availability_v1_availability_proto_rawDescOnce sync.Once

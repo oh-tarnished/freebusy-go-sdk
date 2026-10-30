@@ -26,9 +26,9 @@ client:
 source:
   # freebusy's own module is the input; the RFC services it serves come
   # from the RFC module's image (buf build <module> -o rfc.binpb).
-  input: buf.build/shokki-engineering/freebusy:2d0433d66bbe4d05a866413bc120b292
+  input: buf.build/shokki-engineering/freebusy:6ef14b2de747481bb490d663dd0eda64
   references:
-    - module: buf.build/the-protobuf-project/rfc:cc82b3b15066438ba44e89dad69e9f8a
+    - module: buf.build/the-protobuf-project/rfc:3aba0422074b4341aa0f8df07c3263b7
       image: rfc.binpb
 
 services:
