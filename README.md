@@ -128,7 +128,7 @@ flowchart TD
 go get github.com/shokki-engineering/freebusy-go
 ```
 
-It needs Go 1.26.10 or later.
+It needs Go 1.26.11 or later.
 
 ## Quick start
 
