@@ -484,6 +484,7 @@ API's error reasons have their own, matching on reason and domain:
 | `ErrHoldActive` | `HOLD_ACTIVE` | `FAILED_PRECONDITION` | `ReleaseHold` first. |
 | `ErrHoldConverted` | `HOLD_CONVERTED` | `FAILED_PRECONDITION` | Cancel the reservation instead. |
 | `ErrHoldForReschedule` | `HOLD_FOR_RESCHEDULE` | `FAILED_PRECONDITION` | `RescheduleReservation` that reservation onto it, or take a hold without `replaces`. |
+| `ErrHoldIdTaken` | `HOLD_ID_TAKEN` | `ALREADY_EXISTS` | Choose another id, or leave it empty; send `request_id` to make a retry safe. |
 | `ErrHoldLapsed` | `HOLD_LAPSED` | `FAILED_PRECONDITION` | Take a new hold and create the reservation again; hold longer, or `ExtendHold`. |
 | `ErrHoldNotActive` | `HOLD_NOT_ACTIVE` | `FAILED_PRECONDITION` | Take a new hold. |
 | `ErrHoldNotFound` | `HOLD_NOT_FOUND` | `INVALID_ARGUMENT` | Take a hold first with `CreateHold`; for `replaces`, send the reservation's `hold`. |

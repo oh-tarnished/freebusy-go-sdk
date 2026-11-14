@@ -175,6 +175,9 @@ const ReasonHoldConverted = service.ReasonHoldConverted
 // ReasonHoldForReschedule: The hold was taken to replace a booking (`hold.replaces`), so it can only be used to reschedule the reservation made from that hold.
 const ReasonHoldForReschedule = service.ReasonHoldForReschedule
 
+// ReasonHoldIdTaken: `CreateHold`: `hold_id` names a hold that already exists.
+const ReasonHoldIdTaken = service.ReasonHoldIdTaken
+
 // ReasonHoldLapsed: The hold lapsed before the reservation was confirmed; the reservation failed.
 const ReasonHoldLapsed = service.ReasonHoldLapsed
 
@@ -321,6 +324,9 @@ var ErrHoldConverted = service.ErrHoldConverted
 
 // ErrHoldForReschedule is HOLD_FOR_RESCHEDULE (FAILED_PRECONDITION). `RescheduleReservation` that reservation onto it, or take a hold without `replaces`.
 var ErrHoldForReschedule = service.ErrHoldForReschedule
+
+// ErrHoldIdTaken is HOLD_ID_TAKEN (ALREADY_EXISTS). Choose another id, or leave it empty; send `request_id` to make a retry safe.
+var ErrHoldIdTaken = service.ErrHoldIdTaken
 
 // ErrHoldLapsed is HOLD_LAPSED (FAILED_PRECONDITION). Take a new hold and create the reservation again; hold longer, or `ExtendHold`.
 var ErrHoldLapsed = service.ErrHoldLapsed

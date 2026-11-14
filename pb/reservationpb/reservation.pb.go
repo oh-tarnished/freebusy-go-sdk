@@ -133,10 +133,12 @@ type Reservation struct {
 	ConfirmTime *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=confirm_time,json=confirmTime,proto3" json:"confirm_time,omitempty"`
 	// When it was cancelled.
 	CancelTime *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=cancel_time,json=cancelTime,proto3" json:"cancel_time,omitempty"`
-	// Opaque version for optimistic concurrency (AIP-154); echo on cancel.
+	// Opaque version for optimistic concurrency (AIP-154); send it back on
+	// UpdateReservation, CancelReservation or RescheduleReservation.
 	Etag string `protobuf:"bytes,14,opt,name=etag,proto3" json:"etag,omitempty"`
 	// The reservation this one replaced, set when it was made by
-	// RescheduleReservation.
+	// RescheduleReservation. (A reservation, though no resource_reference says
+	// so: like Hold.replaces, it is a reservation naming a reservation.)
 	// Format: reservations/{reservation}
 	Replaces string `protobuf:"bytes,15,opt,name=replaces,proto3" json:"replaces,omitempty"`
 	// The reservation replacing this one, set when RescheduleReservation began.

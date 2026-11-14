@@ -43,9 +43,9 @@ type Delivery struct {
 	EventId string `protobuf:"bytes,2,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
 	// The CloudEvents type, e.g. "freebusy.reservation.confirmed".
 	EventType string `protobuf:"bytes,3,opt,name=event_type,json=eventType,proto3" json:"event_type,omitempty"`
-	// The record that changed.
-	// Format: reservations/{reservation}
-	// or holds/{hold}
+	// The name of the record that changed: a hold (`holds/{hold}`), a
+	// reservation (`reservations/{reservation}`), or a resource, calendar,
+	// event or availability, in that record's own name format.
 	Subject string `protobuf:"bytes,4,opt,name=subject,proto3" json:"subject,omitempty"`
 	// The request body sent: a CloudEvents 1.0 JSON document whose data is the
 	// record as it stood.

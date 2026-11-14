@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -192,12 +193,10 @@ func book(ctx context.Context, client *freebusy.Client, customer string, start, 
 			continue
 		}
 		hold, err := client.Holds.New(ctx, &allocationpb.CreateHoldRequest{
-			Hold: &allocationpb.Hold{
-				Window: window, Quantity: 1, CandidateResources: free,
-				// A retry after a lost answer gets this hold back instead of
-				// taking a second room.
-				IdempotencyKey: customer + "-" + from.Format("1504"),
-			},
+			Hold: &allocationpb.Hold{Window: window, Quantity: 1, CandidateResources: free},
+			// A retry with this request_id after a lost answer gets this
+			// hold back instead of taking a second room.
+			RequestId: newRequestID(),
 		})
 		switch {
 		case errors.Is(err, freebusy.ErrCapacityExhausted):
@@ -419,3 +418,14 @@ func (r *receiver) wait(typ, subject string, timeout time.Duration) error {
 }
 
 func (r *receiver) Close() { _ = r.srv.Close() }
+
+// newRequestID returns a random UUID (version 4) for a request_id.
+func newRequestID() string {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		log.Fatalf("request id: %v", err)
+	}
+	b[6] = b[6]&0x0f | 0x40
+	b[8] = b[8]&0x3f | 0x80
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
+}

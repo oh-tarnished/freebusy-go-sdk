@@ -556,7 +556,7 @@ func TestErrors(t *testing.T) {
 	c := newClient(t, addr)
 	f.respond = func(string, proto.Message, int) (proto.Message, error) {
 		s, _ := status.New(codes.FailedPrecondition, "no").WithDetails(
-			&errdetails.ErrorInfo{Reason: "CAPACITY_EXHAUSTED", Domain: "freebusy.dev", Metadata: map[string]string{"k": "v"}},
+			&errdetails.ErrorInfo{Reason: "CAPACITY_EXHAUSTED", Domain: "freebusy.shokki.engineering", Metadata: map[string]string{"k": "v"}},
 			&errdetails.BadRequest{FieldViolations: []*errdetails.BadRequest_FieldViolation{{Field: "a.b", Description: "bad"}}},
 		)
 		return nil, s.Err()

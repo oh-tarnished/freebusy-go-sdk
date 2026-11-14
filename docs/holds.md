@@ -41,13 +41,14 @@ Takes a hold, allocating concrete resources for the window.
 
 The server chooses which resources are taken from the candidates offered,
 under a lock, so two callers racing for the last bay cannot both win.
-Requires an idempotency key: a retry after a timeout returns the original
-hold rather than taking a second one.
+Send `request_id` to make a retry safe: a retry after a timeout with the
+same id returns the original hold rather than taking a second one.
 
 | Field | Type | Required | |
 |---|---|---|---|
 | `Hold` | `*allocationpb.Hold` | yes | // The hold to take. |
 | `HoldId` | `string` |  | // Client-assigned id, becoming the last segment of the hold name. |
+| `RequestId` | `string` |  | // A unique id for this request, making it safe to retry (AIP-155). |
 
 ```go
 hold, err := client.Holds.New(ctx, &allocationpb.CreateHoldRequest{

@@ -209,6 +209,8 @@ const (
 	ReasonHoldConverted = "HOLD_CONVERTED"
 	// ReasonHoldForReschedule: The hold was taken to replace a booking (`hold.replaces`), so it can only be used to reschedule the reservation made from that hold.
 	ReasonHoldForReschedule = "HOLD_FOR_RESCHEDULE"
+	// ReasonHoldIdTaken: `CreateHold`: `hold_id` names a hold that already exists.
+	ReasonHoldIdTaken = "HOLD_ID_TAKEN"
 	// ReasonHoldLapsed: The hold lapsed before the reservation was confirmed; the reservation failed.
 	ReasonHoldLapsed = "HOLD_LAPSED"
 	// ReasonHoldNotActive: The hold expired, was released, or became a reservation.
@@ -269,69 +271,71 @@ const (
 // with that reason and domain.
 var (
 	// ErrCapacityExhausted is CAPACITY_EXHAUSTED (FAILED_PRECONDITION). Ask for fewer, or another window; `ComputeAvailability` shows what is free.
-	ErrCapacityExhausted = &Error{Code: codes.FailedPrecondition, Reason: ReasonCapacityExhausted, Domain: "freebusy.dev", sentinel: true}
+	ErrCapacityExhausted = &Error{Code: codes.FailedPrecondition, Reason: ReasonCapacityExhausted, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrEngineBusy is ENGINE_BUSY (RESOURCE_EXHAUSTED). Retry after a short randomized backoff; a narrower request (a resource type, a tighter filter, a smaller page) is cheaper.
-	ErrEngineBusy = &Error{Code: codes.ResourceExhausted, Reason: ReasonEngineBusy, Domain: "freebusy.dev", sentinel: true}
+	ErrEngineBusy = &Error{Code: codes.ResourceExhausted, Reason: ReasonEngineBusy, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrFilterUnsupported is FILTER_UNSUPPORTED (INVALID_ARGUMENT). Pass the types in the request's `resource_types` field instead, or configure Postgres for the server.
-	ErrFilterUnsupported = &Error{Code: codes.InvalidArgument, Reason: ReasonFilterUnsupported, Domain: "freebusy.dev", sentinel: true}
+	ErrFilterUnsupported = &Error{Code: codes.InvalidArgument, Reason: ReasonFilterUnsupported, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrHoldActive is HOLD_ACTIVE (FAILED_PRECONDITION). `ReleaseHold` first.
-	ErrHoldActive = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldActive, Domain: "freebusy.dev", sentinel: true}
+	ErrHoldActive = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldActive, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrHoldConverted is HOLD_CONVERTED (FAILED_PRECONDITION). Cancel the reservation instead.
-	ErrHoldConverted = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldConverted, Domain: "freebusy.dev", sentinel: true}
+	ErrHoldConverted = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldConverted, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrHoldForReschedule is HOLD_FOR_RESCHEDULE (FAILED_PRECONDITION). `RescheduleReservation` that reservation onto it, or take a hold without `replaces`.
-	ErrHoldForReschedule = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldForReschedule, Domain: "freebusy.dev", sentinel: true}
+	ErrHoldForReschedule = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldForReschedule, Domain: "freebusy.shokki.engineering", sentinel: true}
+	// ErrHoldIdTaken is HOLD_ID_TAKEN (ALREADY_EXISTS). Choose another id, or leave it empty; send `request_id` to make a retry safe.
+	ErrHoldIdTaken = &Error{Code: codes.AlreadyExists, Reason: ReasonHoldIdTaken, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrHoldLapsed is HOLD_LAPSED (FAILED_PRECONDITION). Take a new hold and create the reservation again; hold longer, or `ExtendHold`.
-	ErrHoldLapsed = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldLapsed, Domain: "freebusy.dev", sentinel: true}
+	ErrHoldLapsed = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldLapsed, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrHoldNotActive is HOLD_NOT_ACTIVE (FAILED_PRECONDITION). Take a new hold.
-	ErrHoldNotActive = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldNotActive, Domain: "freebusy.dev", sentinel: true}
+	ErrHoldNotActive = &Error{Code: codes.FailedPrecondition, Reason: ReasonHoldNotActive, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrHoldNotFound is HOLD_NOT_FOUND (INVALID_ARGUMENT). Take a hold first with `CreateHold`; for `replaces`, send the reservation's `hold`.
-	ErrHoldNotFound = &Error{Code: codes.InvalidArgument, Reason: ReasonHoldNotFound, Domain: "freebusy.dev", sentinel: true}
+	ErrHoldNotFound = &Error{Code: codes.InvalidArgument, Reason: ReasonHoldNotFound, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrInvalidFacet is INVALID_FACET (INVALID_ARGUMENT). Count by `resource_types`, `display_name` or `attributes.<path>`.
-	ErrInvalidFacet = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidFacet, Domain: "freebusy.dev", sentinel: true}
+	ErrInvalidFacet = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidFacet, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrInvalidFilter is INVALID_FILTER (INVALID_ARGUMENT). Filter on `resource_types`, `display_name` and `attributes.<path>`, e.g. `resource_types:"room" AND attributes.view = "river"`.
-	ErrInvalidFilter = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidFilter, Domain: "freebusy.dev", sentinel: true}
+	ErrInvalidFilter = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidFilter, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrInvalidHoldExtension is INVALID_HOLD_EXTENSION (INVALID_ARGUMENT). Extend by less, again before it expires if needed.
-	ErrInvalidHoldExtension = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidHoldExtension, Domain: "freebusy.dev", sentinel: true}
+	ErrInvalidHoldExtension = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidHoldExtension, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrInvalidOrderBy is INVALID_ORDER_BY (INVALID_ARGUMENT). Order by `resource`, `display_name`, `free_fraction` or `attributes.max_occupancy`.
-	ErrInvalidOrderBy = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidOrderBy, Domain: "freebusy.dev", sentinel: true}
+	ErrInvalidOrderBy = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidOrderBy, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrInvalidPageToken is INVALID_PAGE_TOKEN (INVALID_ARGUMENT). Send `next_page_token` unchanged, with the same other fields, or leave it empty.
-	ErrInvalidPageToken = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidPageToken, Domain: "freebusy.dev", sentinel: true}
+	ErrInvalidPageToken = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidPageToken, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrInvalidTimeZone is INVALID_TIME_ZONE (INVALID_ARGUMENT). Use one such as `Europe/London`, or leave it empty for the zone of the first resource's calendar.
-	ErrInvalidTimeZone = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidTimeZone, Domain: "freebusy.dev", sentinel: true}
+	ErrInvalidTimeZone = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidTimeZone, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrInvalidUri is INVALID_URI (INVALID_ARGUMENT). Send scheme, host and path.
-	ErrInvalidUri = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidUri, Domain: "freebusy.dev", sentinel: true}
+	ErrInvalidUri = &Error{Code: codes.InvalidArgument, Reason: ReasonInvalidUri, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrOrderByUnsupported is ORDER_BY_UNSUPPORTED (INVALID_ARGUMENT). Order by `resource`, `display_name` or `free_fraction`, or configure Postgres for the server.
-	ErrOrderByUnsupported = &Error{Code: codes.InvalidArgument, Reason: ReasonOrderByUnsupported, Domain: "freebusy.dev", sentinel: true}
+	ErrOrderByUnsupported = &Error{Code: codes.InvalidArgument, Reason: ReasonOrderByUnsupported, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrOutsideAvailability is OUTSIDE_AVAILABILITY (FAILED_PRECONDITION). Ask for a window inside opening hours; `ComputeAvailability` shows what is offered and free.
-	ErrOutsideAvailability = &Error{Code: codes.FailedPrecondition, Reason: ReasonOutsideAvailability, Domain: "freebusy.dev", sentinel: true}
+	ErrOutsideAvailability = &Error{Code: codes.FailedPrecondition, Reason: ReasonOutsideAvailability, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrReplacedHoldNotBooked is REPLACED_HOLD_NOT_BOOKED (FAILED_PRECONDITION). Send the `hold` of a confirmed reservation, or leave `replaces` empty.
-	ErrReplacedHoldNotBooked = &Error{Code: codes.FailedPrecondition, Reason: ReasonReplacedHoldNotBooked, Domain: "freebusy.dev", sentinel: true}
+	ErrReplacedHoldNotBooked = &Error{Code: codes.FailedPrecondition, Reason: ReasonReplacedHoldNotBooked, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrReplacementFailed is REPLACEMENT_FAILED (FAILED_PRECONDITION). Take a fresh hold and reschedule again.
-	ErrReplacementFailed = &Error{Code: codes.FailedPrecondition, Reason: ReasonReplacementFailed, Domain: "freebusy.dev", sentinel: true}
+	ErrReplacementFailed = &Error{Code: codes.FailedPrecondition, Reason: ReasonReplacementFailed, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrRescheduleInProgress is RESCHEDULE_IN_PROGRESS (FAILED_PRECONDITION). Wait for that move; `GetReservation` shows its state.
-	ErrRescheduleInProgress = &Error{Code: codes.FailedPrecondition, Reason: ReasonRescheduleInProgress, Domain: "freebusy.dev", sentinel: true}
+	ErrRescheduleInProgress = &Error{Code: codes.FailedPrecondition, Reason: ReasonRescheduleInProgress, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrReservationFailed is RESERVATION_FAILED (FAILED_PRECONDITION). Nothing to do.
-	ErrReservationFailed = &Error{Code: codes.FailedPrecondition, Reason: ReasonReservationFailed, Domain: "freebusy.dev", sentinel: true}
+	ErrReservationFailed = &Error{Code: codes.FailedPrecondition, Reason: ReasonReservationFailed, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrReservationIdTaken is RESERVATION_ID_TAKEN (ALREADY_EXISTS). Choose another id, or leave it empty.
-	ErrReservationIdTaken = &Error{Code: codes.AlreadyExists, Reason: ReasonReservationIdTaken, Domain: "freebusy.dev", sentinel: true}
+	ErrReservationIdTaken = &Error{Code: codes.AlreadyExists, Reason: ReasonReservationIdTaken, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrReservationMoved is RESERVATION_MOVED (FAILED_PRECONDITION). Act on the replacement the message names.
-	ErrReservationMoved = &Error{Code: codes.FailedPrecondition, Reason: ReasonReservationMoved, Domain: "freebusy.dev", sentinel: true}
+	ErrReservationMoved = &Error{Code: codes.FailedPrecondition, Reason: ReasonReservationMoved, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrReservationNotConfirmed is RESERVATION_NOT_CONFIRMED (FAILED_PRECONDITION). Create a new reservation from a new hold.
-	ErrReservationNotConfirmed = &Error{Code: codes.FailedPrecondition, Reason: ReasonReservationNotConfirmed, Domain: "freebusy.dev", sentinel: true}
+	ErrReservationNotConfirmed = &Error{Code: codes.FailedPrecondition, Reason: ReasonReservationNotConfirmed, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrSameHold is SAME_HOLD (INVALID_ARGUMENT). Take a hold for the new window and reschedule onto it.
-	ErrSameHold = &Error{Code: codes.InvalidArgument, Reason: ReasonSameHold, Domain: "freebusy.dev", sentinel: true}
+	ErrSameHold = &Error{Code: codes.InvalidArgument, Reason: ReasonSameHold, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrTooManyBuckets is TOO_MANY_BUCKETS (INVALID_ARGUMENT). A shorter window, a longer `slot_duration`, or day granularity.
-	ErrTooManyBuckets = &Error{Code: codes.InvalidArgument, Reason: ReasonTooManyBuckets, Domain: "freebusy.dev", sentinel: true}
+	ErrTooManyBuckets = &Error{Code: codes.InvalidArgument, Reason: ReasonTooManyBuckets, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrUnknownEventType is UNKNOWN_EVENT_TYPE (INVALID_ARGUMENT). Choose from the list in the message, or leave it empty for all.
-	ErrUnknownEventType = &Error{Code: codes.InvalidArgument, Reason: ReasonUnknownEventType, Domain: "freebusy.dev", sentinel: true}
+	ErrUnknownEventType = &Error{Code: codes.InvalidArgument, Reason: ReasonUnknownEventType, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrUriHasCredentials is URI_HAS_CREDENTIALS (INVALID_ARGUMENT). Remove them; verify the delivery signature instead.
-	ErrUriHasCredentials = &Error{Code: codes.InvalidArgument, Reason: ReasonUriHasCredentials, Domain: "freebusy.dev", sentinel: true}
+	ErrUriHasCredentials = &Error{Code: codes.InvalidArgument, Reason: ReasonUriHasCredentials, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrUriNotHttps is URI_NOT_HTTPS (INVALID_ARGUMENT). Serve the endpoint over https.
-	ErrUriNotHttps = &Error{Code: codes.InvalidArgument, Reason: ReasonUriNotHttps, Domain: "freebusy.dev", sentinel: true}
+	ErrUriNotHttps = &Error{Code: codes.InvalidArgument, Reason: ReasonUriNotHttps, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrUriNotPublic is URI_NOT_PUBLIC (INVALID_ARGUMENT). Expose it publicly.
-	ErrUriNotPublic = &Error{Code: codes.InvalidArgument, Reason: ReasonUriNotPublic, Domain: "freebusy.dev", sentinel: true}
+	ErrUriNotPublic = &Error{Code: codes.InvalidArgument, Reason: ReasonUriNotPublic, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrWebhookHasDeliveries is WEBHOOK_HAS_DELIVERIES (FAILED_PRECONDITION). Send `force=true`, or `PauseWebhook` to keep the record.
-	ErrWebhookHasDeliveries = &Error{Code: codes.FailedPrecondition, Reason: ReasonWebhookHasDeliveries, Domain: "freebusy.dev", sentinel: true}
+	ErrWebhookHasDeliveries = &Error{Code: codes.FailedPrecondition, Reason: ReasonWebhookHasDeliveries, Domain: "freebusy.shokki.engineering", sentinel: true}
 	// ErrWindowBeyondHorizon is WINDOW_BEYOND_HORIZON (INVALID_ARGUMENT). Search inside the horizon, or leave `order_by` and `facets` empty.
-	ErrWindowBeyondHorizon = &Error{Code: codes.InvalidArgument, Reason: ReasonWindowBeyondHorizon, Domain: "freebusy.dev", sentinel: true}
+	ErrWindowBeyondHorizon = &Error{Code: codes.InvalidArgument, Reason: ReasonWindowBeyondHorizon, Domain: "freebusy.shokki.engineering", sentinel: true}
 )

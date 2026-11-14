@@ -74,9 +74,6 @@ type Hold struct {
 	ExpireTime *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=expire_time,json=expireTime,proto3" json:"expire_time,omitempty"`
 	// Lifecycle state. New holds start ACTIVE.
 	State HoldState `protobuf:"varint,6,opt,name=state,proto3,enum=freebusy.allocation.v1.HoldState" json:"state,omitempty"`
-	// Caller-supplied key making CreateHold safe to retry. A repeat with the same
-	// key returns the original hold rather than taking a second one.
-	IdempotencyKey string `protobuf:"bytes,8,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
 	// Creation timestamp.
 	CreateTime *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
 	// Last-modification timestamp.
@@ -181,13 +178,6 @@ func (x *Hold) GetState() HoldState {
 		return x.State
 	}
 	return HoldState_HOLD_STATE_UNSPECIFIED
-}
-
-func (x *Hold) GetIdempotencyKey() string {
-	if x != nil {
-		return x.IdempotencyKey
-	}
-	return ""
 }
 
 func (x *Hold) GetCreateTime() *timestamppb.Timestamp {
@@ -687,7 +677,7 @@ var File_freebusy_allocation_v1_allocation_proto protoreflect.FileDescriptor
 
 const file_freebusy_allocation_v1_allocation_proto_rawDesc = "" +
 	"\n" +
-	"'freebusy/allocation/v1/allocation.proto\x12\x16freebusy.allocation.v1\x1a\"freebusy/allocation/v1/enums.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1agoogle/type/interval.proto\"\xbd\a\n" +
+	"'freebusy/allocation/v1/allocation.proto\x12\x16freebusy.allocation.v1\x1a\"freebusy/allocation/v1/enums.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1agoogle/type/interval.proto\"\x9d\a\n" +
 	"\x04Hold\x12.\n" +
 	"\x04name\x18\x01 \x01(\tB\x1a\xe0A\b\xbaH\x14\xd8\x01\x01r\x0f2\r^holds/[^/]+$R\x04name\x12G\n" +
 	"\tresources\x18\x02 \x03(\tB)\xe0A\x03\xfaA#\n" +
@@ -698,8 +688,7 @@ const file_freebusy_allocation_v1_allocation_proto_rawDesc = "" +
 	"\bquantity\x18\x04 \x01(\x05B\r\xe0A\x01\xe0A\x05\xbaH\x04\x1a\x02(\x00R\bquantity\x12@\n" +
 	"\vexpire_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\n" +
 	"expireTime\x12H\n" +
-	"\x05state\x18\x06 \x01(\x0e2!.freebusy.allocation.v1.HoldStateB\x0f\xe0A\x03ڵ\x18\b\x12\x06ACTIVER\x05state\x125\n" +
-	"\x0fidempotency_key\x18\b \x01(\tB\f\xe0A\x01\xe0A\x05\xe2\xb5\x18\x02\x18\x01R\x0eidempotencyKey\x12@\n" +
+	"\x05state\x18\x06 \x01(\x0e2!.freebusy.allocation.v1.HoldStateB\x0f\xe0A\x03ڵ\x18\b\x12\x06ACTIVER\x05state\x12@\n" +
 	"\vcreate_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampB\x03\xe0A\x03R\n" +
 	"createTime\x12@\n" +
 	"\vupdate_time\x18\n" +
@@ -713,7 +702,7 @@ const file_freebusy_allocation_v1_allocation_proto_rawDesc = "" +
 	"\x05state\n" +
 	"\vexpire_time*\r\n" +
 	"\vupdate_time\xd2\xf0\x19*\n" +
-	"\rfreebusy.hold\x12\acreated\x12\aupdated\x12\adeletedJ\x04\b\a\x10\b\"\xcf\x04\n" +
+	"\rfreebusy.hold\x12\acreated\x12\aupdated\x12\adeletedJ\x04\b\a\x10\bJ\x04\b\b\x10\tR\x0fidempotency_key\"\xcf\x04\n" +
 	"\n" +
 	"Allocation\x12\x17\n" +
 	"\x04name\x18\x01 \x01(\tB\x03\xe0A\bR\x04name\x12E\n" +

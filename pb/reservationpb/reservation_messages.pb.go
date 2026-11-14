@@ -277,9 +277,9 @@ type UpdateReservationRequest struct {
 	// names are read. `etag`, when set, must match the stored one (AIP-154).
 	Reservation *Reservation `protobuf:"bytes,1,opt,name=reservation,proto3" json:"reservation,omitempty"`
 	// The fields to change: `customer`, `attributes`, or both; `*` is both.
-	// It must be sent -- an update never guesses what was meant from the
-	// fields that happen to be set -- and an empty one is rejected with
-	// REQUIRED_FIELD. Any other field is rejected with UNKNOWN_MASK_PATH.
+	// Omitted, it is the ones `reservation` sets (AIP-134), so clearing one
+	// takes a mask naming it; setting neither is rejected with
+	// NOTHING_TO_UPDATE. Any other field is rejected with UNKNOWN_MASK_PATH.
 	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache

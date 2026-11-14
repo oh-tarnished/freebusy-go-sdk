@@ -122,8 +122,8 @@ func (c *HoldClient) Connection() *grpc.ClientConn {
 //
 // The server chooses which resources are taken from the candidates offered,
 // under a lock, so two callers racing for the last bay cannot both win.
-// Requires an idempotency key: a retry after a timeout returns the original
-// hold rather than taking a second one.
+// Send request_id to make a retry safe: a retry after a timeout with the
+// same id returns the original hold rather than taking a second one.
 func (c *HoldClient) CreateHold(ctx context.Context, req *allocationpb.CreateHoldRequest, opts ...gax.CallOption) (*allocationpb.Hold, error) {
 	return c.internalClient.CreateHold(ctx, req, opts...)
 }
