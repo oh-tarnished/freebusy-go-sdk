@@ -5,7 +5,7 @@ go 1.26.11
 require (
 	github.com/googleapis/gax-go/v2 v2.27.0
 	github.com/the-protobuf-project/resourcename v0.0.0-20260616190751-3e187a5d3da5
-	google.golang.org/api v0.315.0
+	google.golang.org/api v0.316.0
 	google.golang.org/genproto v0.0.0-20261012220534-4341edf3f941
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab
 	google.golang.org/grpc v1.85.0
